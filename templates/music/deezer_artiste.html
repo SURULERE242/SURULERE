@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ artiste.name }} — WaveFX{% endblock %}
+{% block content %}
+
+{% if artiste %}
+<div class="hero-section">
+  <div class="hero-cover" style="border-radius:50%">
+    {% if artiste.picture_medium %}
+    <img src="{{ artiste.picture_medium }}" alt="{{ artiste.name }}" style="border-radius:50%">
+    {% else %}🎤{% endif %}
+  </div>
+  <div>
+    <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Artiste · Deezer</div>
+    <div style="font-size:26px;font-weight:700;margin-bottom:6px">{{ artiste.name }}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
+      {{ artiste.nb_fan|default:0 }} fans · {{ artiste.nb_album|default:0 }} albums
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" onclick="playAll()">▶ Tout écouter</button>
+      <a href="{% url 'recherche_deezer' %}" class="btn btn-ghost">← Retour</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if titres %}
+<div class="section-head"><span class="section-title">🔥 Titres populaires</span></div>
+<div class="track-list">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Album</span><span>Preview</span><span>Durée</span>
+  </div>
+  {% for track in titres %}
+  <div class="track-row" data-id="deezer-{{ track.id }}"
+       onclick="playDeezer('{{ track.preview }}','{{ track.title|escapejs }}','{{ artiste.name|escapejs }}','{{ track.album.cover_medium }}',{{ track.duration }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm">
+        <img src="{{ track.album.cover_small }}" alt="">
+      </div>
+      <div>
+        <div class="t-name">{{ track.title }}</div>
+        <div class="t-artist">{{ artiste.name }}</div>
+      </div>
+    </div>
+    <div class="t-album">{{ track.album.title }}</div>
+    <div class="t-plays">
+      {% if track.preview %}
+        <span style="color:var(--green);font-size:11px">✓ Preview</span>
+      {% else %}
+        <span style="color:var(--muted);font-size:11px">Non dispo</span>
+      {% endif %}
+    </div>
+    <div class="t-dur">{{ track.duration|floatformat:0 }}s</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><div class="icon">🎵</div><p>Aucun titre disponible.</p></div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+const tracks = [
+  {% for track in titres %}
+  {% if track.preview %}
+  {url:'{{ track.preview }}',nom:'{{ track.title|escapejs }}',artiste:'{{ artiste.name|escapejs }}',cover:'{{ track.album.cover_medium }}',duree:{{ track.duration }}},
+  {% endif %}
+  {% endfor %}
+];
+let qi=0;
+function playAll(){if(tracks.length){qi=0;let t=tracks[0];playDeezer(t.url,t.nom,t.artiste,t.cover,t.duree);}}
+document.getElementById('audio').addEventListener('ended',()=>{qi++;if(qi<tracks.length){let t=tracks[qi];playDeezer(t.url,t.nom,t.artiste,t.cover,t.duree);}});
+
+function playDeezer(previewUrl, nom, artiste, cover, duree) {
+  if (!previewUrl) { alert('Preview non disponible.'); return; }
+  const audio = document.getElementById('audio');
+  audio.src = previewUrl;
+  audio.play();
+  document.getElementById('btnPlay').textContent = '⏸';
+  document.getElementById('pName').textContent = nom;
+  document.getElementById('pArtist').textContent = artiste;
+  document.getElementById('pTotal').textContent = Math.floor(duree/60)+':'+(duree%60<10?'0':'')+duree%60;
+  if (cover) document.getElementById('pThumb').innerHTML = '<img src="'+cover+'" alt="">';
+}
+</script>
+{% endblock %}
+{% endblock %}

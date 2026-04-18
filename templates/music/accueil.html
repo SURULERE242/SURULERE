@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Accueil — WaveFX{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+  <div class="hero-cover">🎵</div>
+  <div>
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc3);font-weight:600;margin-bottom:6px">✦ Bienvenue</div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:6px">Bonne écoute, {{ user.username }} !</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Découvrez de nouveaux sons, explorez vos favoris.</div>
+    <div style="display:flex;gap:10px">
+      <a href="{% url 'explorer' %}" class="btn btn-primary">Explorer</a>
+      <a href="{% url 'mes_favoris' %}" class="btn btn-ghost">Mes favoris</a>
+    </div>
+  </div>
+</div>
+
+{% if titres_populaires %}
+<div class="section-head">
+  <span class="section-title">🔥 Titres populaires</span>
+</div>
+<div class="track-list" style="margin-bottom:24px">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Album</span><span>Écoutes</span><span>Durée</span>
+  </div>
+  {% for t in titres_populaires %}
+  <div class="track-row" data-id="{{ t.pk }}"
+       onclick="playTitre({{ t.pk }}, '{{ t.fichier_audio.url }}', '{{ t.titre|escapejs }}', '{{ t.artiste.nom|escapejs }}', '{% if t.cover_url %}{{ t.cover_url }}{% endif %}', {{ t.duree }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm">
+        {% if t.cover_url %}<img src="{{ t.cover_url }}" alt="">{% else %}🎵{% endif %}
+      </div>
+      <div>
+        <div class="t-name">{{ t.titre }}</div>
+        <div class="t-artist"><a href="{% url 'detail_artiste' t.artiste.slug %}">{{ t.artiste.nom }}</a></div>
+      </div>
+    </div>
+    <div class="t-album">{% if t.album %}{{ t.album.titre }}{% else %}—{% endif %}</div>
+    <div class="t-plays">{{ t.nb_ecoutes }}</div>
+    <div class="t-dur">{{ t.duree_formattee }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if albums_recents %}
+<div class="section-head">
+  <span class="section-title">💿 Albums récents</span>
+  <a href="{% url 'explorer' %}" class="see-all">Voir tout</a>
+</div>
+<div class="card-grid" style="margin-bottom:24px">
+  {% for album in albums_recents %}
+  <a href="{% url 'detail_album' album.slug %}" class="music-card">
+    <div class="card-cover">
+      {% if album.cover %}<img src="{{ album.cover.url }}" alt="{{ album.titre }}">
+      {% else %}💿{% endif %}
+      <div class="play-overlay">▶</div>
+    </div>
+    <div class="card-title">{{ album.titre }}</div>
+    <div class="card-sub">{{ album.artiste.nom }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if artistes %}
+<div class="section-head">
+  <span class="section-title">🎤 Artistes</span>
+</div>
+<div class="card-grid" style="margin-bottom:24px">
+  {% for artiste in artistes %}
+  <a href="{% url 'detail_artiste' artiste.slug %}" class="music-card">
+    <div class="card-cover">
+      {% if artiste.photo %}<img src="{{ artiste.photo.url }}" alt="">
+      {% else %}🎤{% endif %}
+    </div>
+    <div class="card-title" style="text-align:center">{{ artiste.nom }}</div>
+    <div class="card-sub" style="text-align:center">{{ artiste.nb_titres }} titre{{ artiste.nb_titres|pluralize }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if not titres_populaires and not albums_recents %}
+<div class="empty-state">
+  <div class="icon">🎵</div>
+  <p style="font-size:16px;font-weight:500;margin-bottom:8px">Aucun contenu encore</p>
+  <p style="font-size:13px;margin-bottom:16px">Commencez par ajouter des titres !</p>
+  <a href="{% url 'ajouter_titre' %}" class="btn btn-primary">+ Ajouter un titre</a>
+</div>
+{% endif %}
+{% endblock %}

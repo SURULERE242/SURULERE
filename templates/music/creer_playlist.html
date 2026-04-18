@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Créer une playlist — WaveFX{% endblock %}
+{% block content %}
+<div class="form-card">
+  <div class="form-title">🎵 Nouvelle playlist</div>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group"><label>Nom *</label>{{ form.nom }}</div>
+    <div class="form-group"><label>Description</label>{{ form.description }}</div>
+    <div class="form-group"><label>Pochette (optionnel)</label>{{ form.cover }}</div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px">
+      {{ form.est_publique }} <label style="margin:0;font-size:13px">Rendre publique</label>
+    </div>
+    <button type="submit" class="form-submit">Créer la playlist</button>
+  </form>
+</div>
+{% endblock %}

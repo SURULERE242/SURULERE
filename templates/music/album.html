@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ album.titre }} — WaveFX{% endblock %}
+{% block content %}
+
+<div class="hero-section">
+  <div class="hero-cover">
+    {% if album.cover %}<img src="{{ album.cover.url }}" alt="{{ album.titre }}">{% else %}💿{% endif %}
+  </div>
+  <div>
+    <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">{{ album.get_type_album_display }}</div>
+    <div style="font-size:24px;font-weight:700;margin-bottom:4px">{{ album.titre }}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
+      <a href="{% url 'detail_artiste' album.artiste.slug %}" style="color:var(--acc3)">{{ album.artiste.nom }}</a>
+      · {{ album.date_sortie.year }} · {{ titres.count }} titre{{ titres.count|pluralize }}
+    </div>
+    {% if titres %}
+    <button class="btn btn-primary" onclick="playAll()">▶ Tout écouter</button>
+    {% endif %}
+  </div>
+</div>
+
+{% if titres %}
+<div class="track-list">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Genre</span><span>Écoutes</span><span>Durée</span>
+  </div>
+  {% for t in titres %}
+  <div class="track-row" data-id="{{ t.pk }}"
+       onclick="playTitre({{ t.pk }},'{{ t.fichier_audio.url }}','{{ t.titre|escapejs }}','{{ t.artiste.nom|escapejs }}','{% if t.cover_url %}{{ t.cover_url }}{% endif %}',{{ t.duree }})">
+    <div class="track-num">{{ t.numero_piste }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm">
+        {% if t.cover_url %}<img src="{{ t.cover_url }}" alt="">{% else %}🎵{% endif %}
+      </div>
+      <div>
+        <div class="t-name">{{ t.titre }}</div>
+        <div class="t-artist">{{ t.artiste.nom }}</div>
+      </div>
+    </div>
+    <div class="t-album">{% if t.genre %}{{ t.genre.nom }}{% else %}—{% endif %}</div>
+    <div class="t-plays">{{ t.nb_ecoutes }}</div>
+    <div class="t-dur">{{ t.duree_formattee }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+const tracks = [
+  {% for t in titres %}
+  {id:{{ t.pk }},url:'{{ t.fichier_audio.url }}',nom:'{{ t.titre|escapejs }}',artiste:'{{ t.artiste.nom|escapejs }}',cover:'{% if t.cover_url %}{{ t.cover_url }}{% endif %}',duree:{{ t.duree }}},
+  {% endfor %}
+];
+let qi=0;
+function playAll(){if(tracks.length){qi=0;let t=tracks[0];playTitre(t.id,t.url,t.nom,t.artiste,t.cover,t.duree);}}
+document.getElementById('audio').addEventListener('ended',()=>{qi++;if(qi<tracks.length){let t=tracks[qi];playTitre(t.id,t.url,t.nom,t.artiste,t.cover,t.duree);}});
+</script>
+{% endblock %}
+{% endblock %}

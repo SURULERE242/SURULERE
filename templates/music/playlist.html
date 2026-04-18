@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ playlist.nom }} — WaveFX{% endblock %}
+{% block content %}
+<div class="hero-section">
+  <div class="hero-cover">
+    {% if playlist.cover %}<img src="{{ playlist.cover.url }}" alt="">{% else %}🎵{% endif %}
+  </div>
+  <div>
+    <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Playlist</div>
+    <div style="font-size:24px;font-weight:700;margin-bottom:4px">{{ playlist.nom }}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
+      {{ playlist.proprietaire.username }} · {{ playlist.nb_titres }} titre{{ playlist.nb_titres|pluralize }} · {{ playlist.duree_totale }}
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      {% if items %}<button class="btn btn-primary" onclick="playAll()">▶ Tout écouter</button>{% endif %}
+      {% if not playlist.est_publique %}<span class="badge badge-acc">🔒 Privée</span>{% endif %}
+    </div>
+  </div>
+</div>
+
+{% if items %}
+<div class="track-list">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Album</span><span>Ajouté</span><span>Durée</span>
+  </div>
+  {% for item in items %}
+  <div class="track-row" data-id="{{ item.titre.pk }}"
+       onclick="playTitre({{ item.titre.pk }},'{{ item.titre.fichier_audio.url }}','{{ item.titre.titre|escapejs }}','{{ item.titre.artiste.nom|escapejs }}','{% if item.titre.cover_url %}{{ item.titre.cover_url }}{% endif %}',{{ item.titre.duree }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm">
+        {% if item.titre.cover_url %}<img src="{{ item.titre.cover_url }}" alt="">{% else %}🎵{% endif %}
+      </div>
+      <div>
+        <div class="t-name">{{ item.titre.titre }}</div>
+        <div class="t-artist">{{ item.titre.artiste.nom }}</div>
+      </div>
+    </div>
+    <div class="t-album">{% if item.titre.album %}{{ item.titre.album.titre }}{% else %}—{% endif %}</div>
+    <div class="t-plays" style="font-size:11px">{{ item.date_ajout|date:"d/m/Y" }}</div>
+    <div class="t-dur">{{ item.titre.duree_formattee }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="icon">🎵</div>
+  <p>Cette playlist est vide.</p>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+const tracks = [
+  {% for item in items %}
+  {id:{{ item.titre.pk }},url:'{{ item.titre.fichier_audio.url }}',nom:'{{ item.titre.titre|escapejs }}',artiste:'{{ item.titre.artiste.nom|escapejs }}',cover:'{% if item.titre.cover_url %}{{ item.titre.cover_url }}{% endif %}',duree:{{ item.titre.duree }}},
+  {% endfor %}
+];
+let qi=0;
+function playAll(){if(tracks.length){qi=0;let t=tracks[0];playTitre(t.id,t.url,t.nom,t.artiste,t.cover,t.duree);}}
+document.getElementById('audio').addEventListener('ended',()=>{qi++;if(qi<tracks.length){let t=tracks[qi];playTitre(t.id,t.url,t.nom,t.artiste,t.cover,t.duree);}});
+</script>
+{% endblock %}
+{% endblock %}

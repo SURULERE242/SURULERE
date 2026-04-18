@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Mes playlists — WaveFX{% endblock %}
+{% block content %}
+<div class="section-head">
+  <span class="section-title">🎵 Mes playlists</span>
+  <a href="{% url 'creer_playlist' %}" class="btn btn-primary">+ Créer</a>
+</div>
+{% if playlists %}
+<div class="card-grid">
+  {% for pl in playlists %}
+  <a href="{% url 'detail_playlist' pl.slug %}" class="music-card">
+    <div class="card-cover">
+      {% if pl.cover %}<img src="{{ pl.cover.url }}" alt="">{% else %}🎵{% endif %}
+      <div class="play-overlay">▶</div>
+    </div>
+    <div class="card-title">{{ pl.nom }}</div>
+    <div class="card-sub">{{ pl.nb }} titre{{ pl.nb|pluralize }} · {% if pl.est_publique %}Public{% else %}Privée{% endif %}</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="icon">🎵</div>
+  <p style="margin-bottom:12px">Aucune playlist encore.</p>
+  <a href="{% url 'creer_playlist' %}" class="btn btn-primary">Créer ma première playlist</a>
+</div>
+{% endif %}
+{% endblock %}

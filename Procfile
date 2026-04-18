@@ -1,0 +1,1 @@
+web: gunicorn wavefx.wsgi --log-file -

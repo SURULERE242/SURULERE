@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Favoris — WaveFX{% endblock %}
+{% block content %}
+<div class="section-head"><span class="section-title">❤️ Mes favoris</span></div>
+{% if favoris %}
+<div class="track-list">
+  <div class="track-list-header"><span>#</span><span>Titre</span><span>Album</span><span>Ajouté</span><span>Durée</span></div>
+  {% for fav in favoris %}
+  <div class="track-row" data-id="{{ fav.titre.pk }}"
+       onclick="playTitre({{ fav.titre.pk }},'{{ fav.titre.fichier_audio.url }}','{{ fav.titre.titre|escapejs }}','{{ fav.titre.artiste.nom|escapejs }}','{% if fav.titre.cover_url %}{{ fav.titre.cover_url }}{% endif %}',{{ fav.titre.duree }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm">{% if fav.titre.cover_url %}<img src="{{ fav.titre.cover_url }}" alt="">{% else %}🎵{% endif %}</div>
+      <div><div class="t-name">{{ fav.titre.titre }}</div><div class="t-artist">{{ fav.titre.artiste.nom }}</div></div>
+    </div>
+    <div class="t-album">{% if fav.titre.album %}{{ fav.titre.album.titre }}{% else %}—{% endif %}</div>
+    <div class="t-plays" style="font-size:11px">{{ fav.date_ajout|date:"d/m" }}</div>
+    <div class="t-dur">{{ fav.titre.duree_formattee }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><div class="icon">♡</div><p>Aucun favori encore.</p></div>
+{% endif %}
+{% endblock %}

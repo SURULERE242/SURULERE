@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Ajouter un titre — WaveFX{% endblock %}
+{% block content %}
+<div class="form-card">
+  <div class="form-title">🎵 Ajouter un titre</div>
+  {% if form.errors %}
+  <div class="form-errors">
+    {% for field in form %}{% for e in field.errors %}• {{ e }}<br>{% endfor %}{% endfor %}
+  </div>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group"><label>Titre *</label>{{ form.titre }}</div>
+    <div class="form-group"><label>Artiste *</label>{{ form.artiste }}</div>
+    <div class="form-group"><label>Album</label>{{ form.album }}</div>
+    <div class="form-group"><label>Fichier audio * (MP3, WAV, OGG)</label>{{ form.fichier_audio }}</div>
+    <div class="form-group"><label>Pochette (optionnel)</label>{{ form.cover }}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Durée (secondes)</label>{{ form.duree }}</div>
+      <div class="form-group"><label>N° de piste</label>{{ form.numero_piste }}</div>
+    </div>
+    <div class="form-group"><label>Genre</label>{{ form.genre }}</div>
+    <div class="form-group"><label>Paroles (optionnel)</label>{{ form.paroles }}</div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px">
+      {{ form.est_explicite }} <label style="margin:0;font-size:13px">Contenu explicite</label>
+    </div>
+    <button type="submit" class="form-submit">Publier le titre</button>
+  </form>
+</div>
+{% endblock %}

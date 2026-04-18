@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Recherche — WaveFX{% endblock %}
+{% block content %}
+<h2 style="font-size:18px;font-weight:600;margin-bottom:20px">
+  {% if q %}Résultats pour « {{ q }} »{% else %}Rechercher{% endif %}
+</h2>
+{% if not q %}
+<div class="empty-state"><div class="icon">🔍</div><p>Tapez votre recherche dans la barre en haut.</p></div>
+{% else %}
+  {% if titres %}
+  <div class="section-head"><span class="section-title">Titres</span></div>
+  <div class="track-list" style="margin-bottom:20px">
+    <div class="track-list-header"><span>#</span><span>Titre</span><span>Album</span><span>Écoutes</span><span>Durée</span></div>
+    {% for t in titres %}
+    <div class="track-row" data-id="{{ t.pk }}" onclick="playTitre({{ t.pk }},'{{ t.fichier_audio.url }}','{{ t.titre|escapejs }}','{{ t.artiste.nom|escapejs }}','{% if t.cover_url %}{{ t.cover_url }}{% endif %}',{{ t.duree }})">
+      <div class="track-num">{{ forloop.counter }}</div>
+      <div class="track-info">
+        <div class="track-thumb-sm">{% if t.cover_url %}<img src="{{ t.cover_url }}" alt="">{% else %}🎵{% endif %}</div>
+        <div><div class="t-name">{{ t.titre }}</div><div class="t-artist">{{ t.artiste.nom }}</div></div>
+      </div>
+      <div class="t-album">{% if t.album %}{{ t.album.titre }}{% else %}—{% endif %}</div>
+      <div class="t-plays">{{ t.nb_ecoutes }}</div>
+      <div class="t-dur">{{ t.duree_formattee }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if artistes %}
+  <div class="section-head"><span class="section-title">Artistes</span></div>
+  <div class="card-grid" style="margin-bottom:20px">
+    {% for a in artistes %}
+    <a href="{% url 'detail_artiste' a.slug %}" class="music-card">
+      <div class="card-cover">{% if a.photo %}<img src="{{ a.photo.url }}" alt="">{% else %}🎤{% endif %}<div class="play-overlay">▶</div></div>
+      <div class="card-title">{{ a.nom }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if albums %}
+  <div class="section-head"><span class="section-title">Albums</span></div>
+  <div class="card-grid" style="margin-bottom:20px">
+    {% for al in albums %}
+    <a href="{% url 'detail_album' al.slug %}" class="music-card">
+      <div class="card-cover">{% if al.cover %}<img src="{{ al.cover.url }}" alt="">{% else %}💿{% endif %}<div class="play-overlay">▶</div></div>
+      <div class="card-title">{{ al.titre }}</div>
+      <div class="card-sub">{{ al.artiste.nom }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if not titres and not artistes and not albums %}
+  <div class="empty-state"><div class="icon">😕</div><p>Aucun résultat pour « {{ q }} »</p></div>
+  {% endif %}
+{% endif %}
+{% endblock %}

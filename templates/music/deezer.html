@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load music_filters %}
+{% block title %}Recherche Deezer — WaveFX{% endblock %}
+{% block content %}
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+  <div style="font-size:20px;font-weight:700">🎵 Recherche Deezer</div>
+  <span style="background:rgba(124,90,240,.2);color:var(--acc3);padding:3px 10px;border-radius:12px;font-size:11px">Live</span>
+</div>
+
+<form action="{% url 'recherche_deezer' %}" method="get" style="margin-bottom:28px">
+  <div style="display:flex;gap:10px">
+    <input type="text" name="q" value="{{ q }}" placeholder="Rechercher Drake, Burna Boy, Ninho..."
+      class="form-input" style="flex:1;max-width:500px">
+    <button type="submit" class="btn btn-primary" style="padding:9px 20px">Rechercher</button>
+  </div>
+</form>
+
+{% if resultats %}
+<div class="track-list">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Album</span><span>Preview</span><span>Durée</span>
+  </div>
+  {% for track in resultats %}
+  <div class="track-row" data-id="deezer-{{ track.id }}"
+       onclick="playDeezer('{{ track.preview }}','{{ track.title|escapejs }}','{{ track.artist.name|escapejs }}','{{ track.album.cover_medium }}',{{ track.duration }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm"><img src="{{ track.album.cover_small }}" alt=""></div>
+      <div>
+        <div class="t-name">{{ track.title }}</div>
+        <div class="t-artist">
+          <a href="{% url 'artiste_deezer' track.artist.id %}" onclick="event.stopPropagation()" style="color:var(--acc3)">
+            {{ track.artist.name }}
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="t-album">{{ track.album.title }}</div>
+    <div class="t-plays">
+      {% if track.preview %}<span style="color:var(--green);font-size:11px">✓ Preview</span>
+      {% else %}<span style="color:var(--muted);font-size:11px">Non dispo</span>{% endif %}
+    </div>
+    <div class="t-dur">{{ track.duration }}s</div>
+  </div>
+  {% endfor %}
+</div>
+
+{% elif q %}
+<div class="empty-state"><div class="icon">😕</div><p>Aucun résultat pour « {{ q }} »</p></div>
+
+{% else %}
+<div class="section-head"><span class="section-title">🇺🇸 Rap US</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+  <a href="?q=Drake" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Drake</a>
+  <a href="?q=Kendrick Lamar" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Kendrick Lamar</a>
+  <a href="?q=Travis Scott" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Travis Scott</a>
+  <a href="?q=21 Savage" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">21 Savage</a>
+  <a href="?q=Post Malone" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Post Malone</a>
+  <a href="?q=J. Cole" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">J. Cole</a>
+  <a href="?q=Lil Baby" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Lil Baby</a>
+  <a href="?q=Future" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Future</a>
+  <a href="?q=Lil Durk" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Lil Durk</a>
+  <a href="?q=A$AP Rocky" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">A$AP Rocky</a>
+  <a href="?q=Cardi B" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Cardi B</a>
+  <a href="?q=Nicki Minaj" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Nicki Minaj</a>
+</div>
+
+<div class="section-head"><span class="section-title">🇫🇷 Rap Français</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+  <a href="?q=Ninho" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Ninho</a>
+  <a href="?q=SCH" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">SCH</a>
+  <a href="?q=Jul" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Jul</a>
+  <a href="?q=Freeze Corleone" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Freeze Corleone</a>
+  <a href="?q=Tiakola" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Tiakola</a>
+  <a href="?q=Gazo" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Gazo</a>
+  <a href="?q=Hamza" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Hamza</a>
+  <a href="?q=Booba" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Booba</a>
+  <a href="?q=Kaaris" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Kaaris</a>
+  <a href="?q=Nekfeu" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Nekfeu</a>
+  <a href="?q=Damso" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Damso</a>
+  <a href="?q=PLK" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">PLK</a>
+  <a href="?q=Gims" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Gims</a>
+  <a href="?q=Maes" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Maes</a>
+</div>
+
+<div class="section-head"><span class="section-title">🇳🇬 Afrobeats & Nigeria</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+  <a href="?q=Burna Boy" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Burna Boy</a>
+  <a href="?q=Wizkid" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Wizkid</a>
+  <a href="?q=Davido" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Davido</a>
+  <a href="?q=Asake" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Asake</a>
+  <a href="?q=Rema" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Rema</a>
+  <a href="?q=Ayra Starr" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Ayra Starr</a>
+  <a href="?q=Ckay" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Ckay</a>
+  <a href="?q=Tems" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Tems</a>
+  <a href="?q=Omah Lay" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Omah Lay</a>
+  <a href="?q=Fireboy DML" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Fireboy DML</a>
+  <a href="?q=Olamide" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Olamide</a>
+  <a href="?q=Patoranking" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Patoranking</a>
+</div>
+
+<div class="section-head"><span class="section-title">🌍 Afrique Centrale</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+  <a href="?q=Fally Ipupa" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Fally Ipupa</a>
+  <a href="?q=Innoss B" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Innoss B</a>
+  <a href="?q=Dadju" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Dadju</a>
+  <a href="?q=Aya Nakamura" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Aya Nakamura</a>
+  <a href="?q=Locko" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Locko</a>
+  <a href="?q=Tenor" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Tenor</a>
+  <a href="?q=Mr Leo" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Mr Leo</a>
+  <a href="?q=Charlotte Dipanda" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Charlotte Dipanda</a>
+  <a href="?q=Serge Beynaud" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Serge Beynaud</a>
+</div>
+
+<div class="section-head"><span class="section-title">🎵 Pop & International</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">
+  <a href="?q=The Weeknd" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">The Weeknd</a>
+  <a href="?q=Bad Bunny" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Bad Bunny</a>
+  <a href="?q=Taylor Swift" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Taylor Swift</a>
+  <a href="?q=Ed Sheeran" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Ed Sheeran</a>
+  <a href="?q=Beyonce" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Beyonce</a>
+  <a href="?q=Rihanna" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Rihanna</a>
+  <a href="?q=Eminem" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Eminem</a>
+  <a href="?q=Chris Brown" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Chris Brown</a>
+  <a href="?q=Bruno Mars" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Bruno Mars</a>
+  <a href="?q=Michael Jackson" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Michael Jackson</a>
+  <a href="?q=Bob Marley" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Bob Marley</a>
+  <a href="?q=Dua Lipa" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--muted)">Dua Lipa</a>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+function playDeezer(previewUrl, nom, artiste, cover, duree) {
+  if (!previewUrl) { alert('Preview non disponible pour ce titre.'); return; }
+  const audio = document.getElementById('audio');
+  audio.src = previewUrl;
+  audio.play();
+  document.getElementById('btnPlay').textContent = '⏸';
+  document.getElementById('pName').textContent = nom;
+  document.getElementById('pArtist').textContent = artiste;
+  document.getElementById('pTotal').textContent = Math.floor(duree/60)+':'+(duree%60<10?'0':'')+duree%60;
+  if (cover) document.getElementById('pThumb').innerHTML = '<img src="'+cover+'" alt="">';
+}
+</script>
+{% endblock %}
+{% endblock %}

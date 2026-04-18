@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Explorer — WaveFX{% endblock %}
+{% block content %}
+
+<div class="section-head"><span class="section-title">🎸 Genres</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px">
+  {% for genre in genres %}
+  <a href="{% url 'recherche' %}?q={{ genre.nom }}"
+     style="padding:7px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--muted);transition:all .15s"
+     onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--acc)'"
+     onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
+    {{ genre.nom }} <span style="font-size:11px;opacity:.6">({{ genre.nb }})</span>
+  </a>
+  {% empty %}
+  <p style="color:var(--muted);font-size:13px">Aucun genre pour l'instant.</p>
+  {% endfor %}
+</div>
+
+<div class="section-head">
+  <span class="section-title">🎤 Artistes</span>
+</div>
+<div class="card-grid" style="margin-bottom:28px">
+  {% for artiste in artistes %}
+  <a href="{% url 'detail_artiste' artiste.slug %}" class="music-card">
+    <div class="card-cover">
+      {% if artiste.photo %}<img src="{{ artiste.photo.url }}" alt="">{% else %}🎤{% endif %}
+      <div class="play-overlay">▶</div>
+    </div>
+    <div class="card-title" style="text-align:center">{{ artiste.nom }}</div>
+    <div class="card-sub" style="text-align:center">{{ artiste.nb }} titre{{ artiste.nb|pluralize }}</div>
+  </a>
+  {% empty %}
+  <p style="color:var(--muted);font-size:13px;grid-column:1/-1">Aucun artiste.</p>
+  {% endfor %}
+</div>
+
+<div class="section-head">
+  <span class="section-title">💿 Albums récents</span>
+</div>
+<div class="card-grid">
+  {% for album in albums %}
+  <a href="{% url 'detail_album' album.slug %}" class="music-card">
+    <div class="card-cover">
+      {% if album.cover %}<img src="{{ album.cover.url }}" alt="">{% else %}💿{% endif %}
+      <div class="play-overlay">▶</div>
+    </div>
+    <div class="card-title">{{ album.titre }}</div>
+    <div class="card-sub">{{ album.artiste.nom }} · {{ album.date_sortie.year }}</div>
+  </a>
+  {% empty %}
+  <p style="color:var(--muted);font-size:13px;grid-column:1/-1">Aucun album.</p>
+  {% endfor %}
+</div>
+{% endblock %}
