@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Accueil — WaveFX{% endblock %}
+{% block title %}Accueil — SURULERE{% endblock %}
 
 {% block content %}
 <div class="hero-section">
@@ -10,14 +10,33 @@
     <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Découvrez de nouveaux sons, explorez vos favoris.</div>
     <div style="display:flex;gap:10px">
       <a href="{% url 'explorer' %}" class="btn btn-primary">Explorer</a>
-      <a href="{% url 'mes_favoris' %}" class="btn btn-ghost">Mes favoris</a>
+      <a href="{% url 'recherche_deezer' %}" class="btn btn-ghost">🎵 Deezer</a>
     </div>
   </div>
 </div>
 
+{% if artistes_deezer %}
+<div class="section-head">
+  <span class="section-title">🌍 Artistes populaires du monde</span>
+  <a href="{% url 'recherche_deezer' %}" class="see-all">Voir tout</a>
+</div>
+<div class="card-grid" style="margin-bottom:24px">
+  {% for artiste in artistes_deezer %}
+  <a href="{% url 'artiste_deezer' artiste.id %}" class="music-card">
+    <div class="card-cover" style="border-radius:50%">
+      <img src="{{ artiste.picture_medium }}" alt="{{ artiste.name }}" style="border-radius:50%">
+      <div class="play-overlay" style="border-radius:50%">▶</div>
+    </div>
+    <div class="card-title" style="text-align:center">{{ artiste.name }}</div>
+    <div class="card-sub" style="text-align:center">{{ artiste.nb_fan|default:0 }} fans</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
 {% if titres_populaires %}
 <div class="section-head">
-  <span class="section-title">🔥 Titres populaires</span>
+  <span class="section-title">🔥 Mes titres populaires</span>
 </div>
 <div class="track-list" style="margin-bottom:24px">
   <div class="track-list-header">
@@ -44,50 +63,12 @@
 </div>
 {% endif %}
 
-{% if albums_recents %}
-<div class="section-head">
-  <span class="section-title">💿 Albums récents</span>
-  <a href="{% url 'explorer' %}" class="see-all">Voir tout</a>
-</div>
-<div class="card-grid" style="margin-bottom:24px">
-  {% for album in albums_recents %}
-  <a href="{% url 'detail_album' album.slug %}" class="music-card">
-    <div class="card-cover">
-      {% if album.cover %}<img src="{{ album.cover.url }}" alt="{{ album.titre }}">
-      {% else %}💿{% endif %}
-      <div class="play-overlay">▶</div>
-    </div>
-    <div class="card-title">{{ album.titre }}</div>
-    <div class="card-sub">{{ album.artiste.nom }}</div>
-  </a>
-  {% endfor %}
-</div>
-{% endif %}
-
-{% if artistes %}
-<div class="section-head">
-  <span class="section-title">🎤 Artistes</span>
-</div>
-<div class="card-grid" style="margin-bottom:24px">
-  {% for artiste in artistes %}
-  <a href="{% url 'detail_artiste' artiste.slug %}" class="music-card">
-    <div class="card-cover">
-      {% if artiste.photo %}<img src="{{ artiste.photo.url }}" alt="">
-      {% else %}🎤{% endif %}
-    </div>
-    <div class="card-title" style="text-align:center">{{ artiste.nom }}</div>
-    <div class="card-sub" style="text-align:center">{{ artiste.nb_titres }} titre{{ artiste.nb_titres|pluralize }}</div>
-  </a>
-  {% endfor %}
-</div>
-{% endif %}
-
-{% if not titres_populaires and not albums_recents %}
+{% if not titres_populaires and not artistes_deezer %}
 <div class="empty-state">
   <div class="icon">🎵</div>
-  <p style="font-size:16px;font-weight:500;margin-bottom:8px">Aucun contenu encore</p>
-  <p style="font-size:13px;margin-bottom:16px">Commencez par ajouter des titres !</p>
-  <a href="{% url 'ajouter_titre' %}" class="btn btn-primary">+ Ajouter un titre</a>
+  <p style="font-size:16px;font-weight:500;margin-bottom:8px">Bienvenue sur SURULERE !</p>
+  <p style="font-size:13px;margin-bottom:16px">Explore des millions de titres via Deezer</p>
+  <a href="{% url 'recherche_deezer' %}" class="btn btn-primary">🎵 Découvrir Deezer</a>
 </div>
 {% endif %}
 {% endblock %}

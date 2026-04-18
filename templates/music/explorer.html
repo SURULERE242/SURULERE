@@ -1,6 +1,77 @@
 {% extends "base.html" %}
-{% block title %}Explorer — WaveFX{% endblock %}
+{% block title %}Explorer — SURULERE{% endblock %}
 {% block content %}
+
+{% if tops_deezer.artistes %}
+<div class="section-head">
+  <span class="section-title">🌍 Top Artistes Mondiaux</span>
+  <a href="{% url 'recherche_deezer' %}" class="see-all">Voir tout</a>
+</div>
+<div class="card-grid" style="margin-bottom:28px">
+  {% for artiste in tops_deezer.artistes %}
+  <a href="{% url 'artiste_deezer' artiste.id %}" class="music-card">
+    <div class="card-cover" style="border-radius:50%">
+      <img src="{{ artiste.picture_medium }}" alt="{{ artiste.name }}" style="border-radius:50%">
+      <div class="play-overlay" style="border-radius:50%">▶</div>
+    </div>
+    <div class="card-title" style="text-align:center">{{ artiste.name }}</div>
+    <div class="card-sub" style="text-align:center">{{ artiste.nb_fan }} fans</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if tops_deezer.titres %}
+<div class="section-head">
+  <span class="section-title">🔥 Top Titres Mondiaux</span>
+</div>
+<div class="track-list" style="margin-bottom:28px">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Album</span><span>Preview</span><span>Durée</span>
+  </div>
+  {% for track in tops_deezer.titres %}
+  <div class="track-row" data-id="deezer-{{ track.id }}"
+       onclick="playDeezer('{{ track.preview }}','{{ track.title|escapejs }}','{{ track.artist.name|escapejs }}','{{ track.album.cover_medium }}',{{ track.duration }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm"><img src="{{ track.album.cover_small }}" alt=""></div>
+      <div>
+        <div class="t-name">{{ track.title }}</div>
+        <div class="t-artist">
+          <a href="{% url 'artiste_deezer' track.artist.id %}" onclick="event.stopPropagation()" style="color:var(--acc3)">
+            {{ track.artist.name }}
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="t-album">{{ track.album.title }}</div>
+    <div class="t-plays">
+      {% if track.preview %}<span style="color:var(--green);font-size:11px">✓ Preview</span>
+      {% else %}<span style="color:var(--muted);font-size:11px">Non dispo</span>{% endif %}
+    </div>
+    <div class="t-dur">{{ track.duration }}s</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if tops_deezer.albums %}
+<div class="section-head">
+  <span class="section-title">💿 Top Albums Mondiaux</span>
+</div>
+<div class="card-grid" style="margin-bottom:28px">
+  {% for album in tops_deezer.albums %}
+  <a href="{% url 'recherche_deezer' %}?q={{ album.artist.name }}" class="music-card">
+    <div class="card-cover">
+      <img src="{{ album.cover_medium }}" alt="{{ album.title }}">
+      <div class="play-overlay">▶</div>
+    </div>
+    <div class="card-title">{{ album.title }}</div>
+    <div class="card-sub">{{ album.artist.name }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
 
 <div class="section-head"><span class="section-title">🎸 Genres</span></div>
 <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px">
@@ -16,39 +87,19 @@
   {% endfor %}
 </div>
 
-<div class="section-head">
-  <span class="section-title">🎤 Artistes</span>
-</div>
-<div class="card-grid" style="margin-bottom:28px">
-  {% for artiste in artistes %}
-  <a href="{% url 'detail_artiste' artiste.slug %}" class="music-card">
-    <div class="card-cover">
-      {% if artiste.photo %}<img src="{{ artiste.photo.url }}" alt="">{% else %}🎤{% endif %}
-      <div class="play-overlay">▶</div>
-    </div>
-    <div class="card-title" style="text-align:center">{{ artiste.nom }}</div>
-    <div class="card-sub" style="text-align:center">{{ artiste.nb }} titre{{ artiste.nb|pluralize }}</div>
-  </a>
-  {% empty %}
-  <p style="color:var(--muted);font-size:13px;grid-column:1/-1">Aucun artiste.</p>
-  {% endfor %}
-</div>
-
-<div class="section-head">
-  <span class="section-title">💿 Albums récents</span>
-</div>
-<div class="card-grid">
-  {% for album in albums %}
-  <a href="{% url 'detail_album' album.slug %}" class="music-card">
-    <div class="card-cover">
-      {% if album.cover %}<img src="{{ album.cover.url }}" alt="">{% else %}💿{% endif %}
-      <div class="play-overlay">▶</div>
-    </div>
-    <div class="card-title">{{ album.titre }}</div>
-    <div class="card-sub">{{ album.artiste.nom }} · {{ album.date_sortie.year }}</div>
-  </a>
-  {% empty %}
-  <p style="color:var(--muted);font-size:13px;grid-column:1/-1">Aucun album.</p>
-  {% endfor %}
-</div>
+{% block extra_js %}
+<script>
+function playDeezer(previewUrl, nom, artiste, cover, duree) {
+  if (!previewUrl) { alert('Preview non disponible pour ce titre.'); return; }
+  const audio = document.getElementById('audio');
+  audio.src = previewUrl;
+  audio.play();
+  document.getElementById('btnPlay').textContent = '⏸';
+  document.getElementById('pName').textContent = nom;
+  document.getElementById('pArtist').textContent = artiste;
+  document.getElementById('pTotal').textContent = Math.floor(duree/60)+':'+(duree%60<10?'0':'')+duree%60;
+  if (cover) document.getElementById('pThumb').innerHTML = '<img src="'+cover+'" alt="">';
+}
+</script>
+{% endblock %}
 {% endblock %}
