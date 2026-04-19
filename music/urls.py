@@ -35,4 +35,5 @@ urlpatterns = [
     path('playlist/<slug:playlist_slug>/retirer/<int:titre_pk>/', views.retirer_de_playlist, name='retirer_de_playlist'),
     path('deezer/', views.recherche_deezer, name='recherche_deezer'),
     path('deezer/artiste/<int:artiste_id>/', views.artiste_deezer, name='artiste_deezer'),
+    path('playlists-deezer/', views.playlists_deezer, name='playlists_deezer'),
 ]

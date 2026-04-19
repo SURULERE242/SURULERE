@@ -1,24 +1,29 @@
+{% load static %}
 {% extends "base.html" %}
-{% block title %}Connexion — WaveFX{% endblock %}
+{% block title %}Inscription — SURULERE{% endblock %}
 {% block auth_content %}
 <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px">
   <div class="form-card" style="width:100%">
     <div style="text-align:center;margin-bottom:28px">
-      <div style="width:48px;height:48px;background:linear-gradient(135deg,var(--acc),var(--acc3));border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px">♪</div>
-      <div style="font-size:22px;font-weight:700">wave<span style="color:var(--acc2)">fx</span></div>
+      <img src="{% static 'images/logo.jpg' %}" style="width:180px;height:70px;object-fit:contain;margin-bottom:12px" alt="BANDIT PROD">
     </div>
-    <div class="form-title" style="text-align:center">Connexion</div>
+    <div class="form-title" style="text-align:center">Créer un compte</div>
     {% if form.errors %}
-    <div class="form-errors">Identifiants incorrects. Veuillez réessayer.</div>
+    <div class="form-errors">
+      {% for field in form %}{% for error in field.errors %}• {{ error }}<br>{% endfor %}{% endfor %}
+      {% for error in form.non_field_errors %}• {{ error }}<br>{% endfor %}
+    </div>
     {% endif %}
     <form method="post">
       {% csrf_token %}
       <div class="form-group"><label>Nom d'utilisateur</label>{{ form.username }}</div>
-      <div class="form-group"><label>Mot de passe</label>{{ form.password }}</div>
-      <button type="submit" class="form-submit">Se connecter</button>
+      <div class="form-group"><label>Email</label>{{ form.email }}</div>
+      <div class="form-group"><label>Mot de passe</label>{{ form.password1 }}</div>
+      <div class="form-group"><label>Confirmer le mot de passe</label>{{ form.password2 }}</div>
+      <button type="submit" class="form-submit">Créer mon compte</button>
     </form>
     <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted)">
-      Pas de compte ? <a href="{% url 'inscription' %}" style="color:var(--acc3)">S'inscrire</a>
+      Déjà un compte ? <a href="{% url 'connexion' %}" style="color:var(--acc3)">Se connecter</a>
     </p>
   </div>
 </div>

@@ -73,19 +73,54 @@
 </div>
 {% endif %}
 
-<div class="section-head"><span class="section-title">🎸 Genres</span></div>
-<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px">
-  {% for genre in genres %}
-  <a href="{% url 'recherche' %}?q={{ genre.nom }}"
-     style="padding:7px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--muted);transition:all .15s"
-     onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--acc)'"
-     onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
-    {{ genre.nom }} <span style="font-size:11px;opacity:.6">({{ genre.nb }})</span>
-  </a>
-  {% empty %}
-  <p style="color:var(--muted);font-size:13px">Aucun genre pour l'instant.</p>
+<!-- Hits par genre -->
+{% for genre_nom, tracks in genres_deezer.items %}
+{% if tracks %}
+<div class="section-head">
+  <span class="section-title">
+    {% if genre_nom == "Hip-Hop" %}🎤
+    {% elif genre_nom == "Afrobeats" %}🌍
+    {% elif genre_nom == "R&B" %}🎶
+    {% elif genre_nom == "Pop" %}⭐
+    {% elif genre_nom == "Rock" %}🎸
+    {% elif genre_nom == "Jazz" %}🎷
+    {% elif genre_nom == "Électronique" %}🎧
+    {% elif genre_nom == "Reggae" %}🌿
+    {% endif %}
+    {{ genre_nom }}
+  </span>
+  <a href="{% url 'recherche_deezer' %}?q={{ genre_nom }}" class="see-all">Voir tout</a>
+</div>
+<div class="track-list" style="margin-bottom:28px">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Album</span><span>Preview</span><span>Durée</span>
+  </div>
+  {% for track in tracks %}
+  <div class="track-row" data-id="deezer-{{ track.id }}"
+       onclick="playDeezer('{{ track.preview }}','{{ track.title|escapejs }}','{{ track.artist.name|escapejs }}','{{ track.album.cover_medium }}',{{ track.duration }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm"><img src="{{ track.album.cover_small }}" alt=""></div>
+      <div>
+        <div class="t-name">{{ track.title }}</div>
+        <div class="t-artist">
+          <a href="{% url 'artiste_deezer' track.artist.id %}" onclick="event.stopPropagation()" style="color:var(--acc3)">
+            {{ track.artist.name }}
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="t-album">{{ track.album.title }}</div>
+    <div class="t-plays">
+      {% if track.preview %}<span style="color:var(--green);font-size:11px">✓ Preview</span>
+      {% else %}<span style="color:var(--muted);font-size:11px">Non dispo</span>{% endif %}
+    </div>
+    <div class="t-dur">{{ track.duration }}s</div>
+  </div>
   {% endfor %}
 </div>
+{% endif %}
+{% endfor %}
 
 {% block extra_js %}
 <script>

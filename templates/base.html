@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -131,8 +132,7 @@
 <div class="app">
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-icon">♪</div>
-      <div class="logo-text">SURULERE</div>
+    <img src="{% static 'images/logo.jpg' %}" style="width:120px;height:40px;object-fit:contain;border-radius:6px" alt="BANDIT PROD">
     </div>
     <nav class="nav">
       <div class="nav-section">
@@ -147,6 +147,7 @@
         <a href="{% url 'ajouter_titre' %}" class="nav-link">♪ Ajouter un titre</a>
         <a href="{% url 'profil' %}" class="nav-link {% if request.resolver_match.url_name == 'profil' %}active{% endif %}">☺ Profil</a>
         <a href="{% url 'recherche_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'recherche_deezer' %}active{% endif %}" style="color:#a238ff">🎵 Deezer</a>
+        <a href="{% url 'playlists_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'playlists_deezer' %}active{% endif %}" style="color:#1db954">🎵 Playlists Deezer</a>
       </div>
       {% with playlists=request.user.playlists.all|slice:":5" %}
       {% if playlists %}
