@@ -415,3 +415,57 @@ def mes_likes_deezer(request):
     from .models import LikeDeezer
     likes = LikeDeezer.objects.filter(utilisateur=request.user)
     return render(request, 'music/likes_deezer.html', {'likes': likes})
+@login_required
+def commentaires_artiste(request, artiste_id):
+    from .models import CommentaireDeezer
+    
+    # Récupérer les infos de l'artiste depuis Deezer
+    artiste = {}
+    try:
+        url = f"https://api.deezer.com/artist/{artiste_id}"
+        with urllib.request.urlopen(url) as response:
+            artiste = json.loads(response.read())
+    except Exception:
+        pass
+
+    # Ajouter un commentaire
+    if request.method == 'POST':
+        contenu = request.POST.get('contenu', '').strip()
+        note = request.POST.get('note', 5)
+        if contenu:
+            CommentaireDeezer.objects.create(
+                utilisateur=request.user,
+                deezer_artiste_id=str(artiste_id),
+                artiste_nom=artiste.get('name', ''),
+                contenu=contenu,
+                note=int(note),
+            )
+            messages.success(request, "Commentaire ajouté !")
+            return redirect('commentaires_artiste', artiste_id=artiste_id)
+
+    commentaires = CommentaireDeezer.objects.filter(
+        deezer_artiste_id=str(artiste_id)
+    ).select_related('utilisateur')
+
+    # Calculer la note moyenne
+    note_moyenne = 0
+    if commentaires:
+        note_moyenne = sum(c.note for c in commentaires) / len(commentaires)
+
+    return render(request, 'music/commentaires_artiste.html', {
+        'artiste': artiste,
+        'commentaires': commentaires,
+        'note_moyenne': round(note_moyenne, 1),
+        'artiste_id': artiste_id,
+    })
+
+
+@login_required
+@require_POST
+def supprimer_commentaire(request, commentaire_id):
+    from .models import CommentaireDeezer
+    commentaire = get_object_or_404(CommentaireDeezer, pk=commentaire_id, utilisateur=request.user)
+    artiste_id = commentaire.deezer_artiste_id
+    commentaire.delete()
+    messages.success(request, "Commentaire supprimé !")
+    return redirect('commentaires_artiste', artiste_id=artiste_id)

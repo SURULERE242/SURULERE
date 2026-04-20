@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ artiste.name }} — WaveFX{% endblock %}
+{% block title %}{{ artiste.name }} — SURULERE{% endblock %}
 {% block content %}
 
 {% if artiste %}
@@ -15,9 +15,10 @@
     <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
       {{ artiste.nb_fan|default:0 }} fans · {{ artiste.nb_album|default:0 }} albums
     </div>
-    <div style="display:flex;gap:10px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="playAll()">▶ Tout écouter</button>
       <a href="{% url 'recherche_deezer' %}" class="btn btn-ghost">← Retour</a>
+      <a href="{% url 'commentaires_artiste' artiste.id %}" class="btn btn-ghost" style="color:#c4aaff">💬 Commenter</a>
     </div>
   </div>
 </div>
@@ -44,13 +45,15 @@
     </div>
     <div class="t-album">{{ track.album.title }}</div>
     <div class="t-plays">
-      {% if track.preview %}
-        <span style="color:var(--green);font-size:11px">✓ Preview</span>
-      {% else %}
-        <span style="color:var(--muted);font-size:11px">Non dispo</span>
-      {% endif %}
+      {% if track.preview %}<span style="color:var(--green);font-size:11px">✓ Preview</span>
+      {% else %}<span style="color:var(--muted);font-size:11px">Non dispo</span>{% endif %}
     </div>
-    <div class="t-dur">{{ track.duration|floatformat:0 }}s</div>
+    <div class="t-dur" style="display:flex;align-items:center;gap:6px">
+      <button onclick="event.stopPropagation();toggleLike({{ track.id }},'{{ track.title|escapejs }}','{{ artiste.name|escapejs }}','{{ track.album.cover_medium }}','{{ track.preview }}',{{ track.duration }})"
+        id="like-{{ track.id }}"
+        style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted)">♡</button>
+      {{ track.duration }}s
+    </div>
   </div>
   {% endfor %}
 </div>
@@ -81,6 +84,18 @@ function playDeezer(previewUrl, nom, artiste, cover, duree) {
   document.getElementById('pArtist').textContent = artiste;
   document.getElementById('pTotal').textContent = Math.floor(duree/60)+':'+(duree%60<10?'0':'')+duree%60;
   if (cover) document.getElementById('pThumb').innerHTML = '<img src="'+cover+'" alt="">';
+}
+
+function toggleLike(id, titre, artiste, cover, preview, duree) {
+  fetch('{% url "toggle_like_deezer" %}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+    body: JSON.stringify({deezer_id: id, titre: titre, artiste: artiste, cover: cover, preview: preview, duree: duree})
+  }).then(r => r.json()).then(d => {
+    const btn = document.getElementById('like-' + id);
+    btn.textContent = d.liked ? '❤' : '♡';
+    btn.style.color = d.liked ? '#e05c5c' : 'var(--muted)';
+  });
 }
 </script>
 {% endblock %}

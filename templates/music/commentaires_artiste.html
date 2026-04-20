@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Commentaires — {{ artiste.name }}{% endblock %}
+{% block content %}
+
+<div class="hero-section">
+  <div class="hero-cover" style="border-radius:50%">
+    {% if artiste.picture_medium %}
+    <img src="{{ artiste.picture_medium }}" alt="{{ artiste.name }}" style="border-radius:50%">
+    {% else %}🎤{% endif %}
+  </div>
+  <div>
+    <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Commentaires</div>
+    <div style="font-size:26px;font-weight:700;margin-bottom:6px">{{ artiste.name }}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
+      {{ commentaires|length }} commentaire{{ commentaires|length|pluralize }}
+      {% if note_moyenne %} · ⭐ {{ note_moyenne }}/5{% endif %}
+    </div>
+    <a href="{% url 'artiste_deezer' artiste_id %}" class="btn btn-ghost">← Retour</a>
+  </div>
+</div>
+
+<!-- Formulaire d'ajout -->
+<div class="form-card" style="margin-bottom:28px">
+  <div class="form-title" style="font-size:16px">💬 Laisser un commentaire</div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label>Note</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        {% for i in "12345" %}
+        <label style="cursor:pointer;font-size:20px">
+          <input type="radio" name="note" value="{{ forloop.counter }}" style="display:none"
+            {% if forloop.counter == 5 %}checked{% endif %}>
+          <span class="etoile" data-note="{{ forloop.counter }}">⭐</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Commentaire</label>
+      <textarea name="contenu" class="form-input" rows="3" placeholder="Ton avis sur cet artiste..." required></textarea>
+    </div>
+    <button type="submit" class="form-submit">Publier</button>
+  </form>
+</div>
+
+<!-- Liste des commentaires -->
+{% if commentaires %}
+<div class="section-head"><span class="section-title">💬 Commentaires</span></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+  {% for commentaire in commentaires %}
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">
+          {{ commentaire.utilisateur.username|first|upper }}
+        </div>
+        <div>
+          <div style="font-size:13.5px;font-weight:500">{{ commentaire.utilisateur.username }}</div>
+          <div style="font-size:11px;color:var(--muted)">{{ commentaire.date_creation|date:"d/m/Y à H:i" }}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="color:#f5a623;font-size:14px">
+          {% for i in "12345" %}{% if forloop.counter <= commentaire.note %}⭐{% endif %}{% endfor %}
+        </span>
+        {% if commentaire.utilisateur == request.user %}
+        <form method="post" action="{% url 'supprimer_commentaire' commentaire.pk %}">
+          {% csrf_token %}
+          <button type="submit" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px">🗑️</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    <p style="font-size:13.5px;color:var(--text);line-height:1.6">{{ commentaire.contenu }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="icon">💬</div>
+  <p>Aucun commentaire encore. Sois le premier !</p>
+</div>
+{% endif %}
+
+{% endblock %}

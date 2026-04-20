@@ -184,17 +184,13 @@ class ProfilUtilisateur(models.Model):
     abonne_premium = models.BooleanField(default=False)
     date_creation = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Profil de {self.utilisateur.username}"
-
-
 class LikeDeezer(models.Model):
     utilisateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_deezer')
     deezer_id = models.CharField(max_length=50)
-    titre = models.CharField(max_length=200)
-    artiste = models.CharField(max_length=200)
-    cover = models.URLField(blank=True)
-    preview = models.URLField(blank=True)
+    titre = models.CharField(max_length=200, default='')
+    artiste = models.CharField(max_length=200, default='')
+    cover = models.URLField(blank=True, default='')
+    preview = models.URLField(blank=True, default='')
     duree = models.PositiveIntegerField(default=0)
     date_ajout = models.DateTimeField(auto_now_add=True)
 
@@ -204,3 +200,19 @@ class LikeDeezer(models.Model):
 
     def __str__(self):
         return f"{self.utilisateur.username} ❤ {self.titre}"
+
+
+class CommentaireDeezer(models.Model):
+    utilisateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='commentaires_deezer')
+    deezer_artiste_id = models.CharField(max_length=50)
+    artiste_nom = models.CharField(max_length=200, default='')
+    contenu = models.TextField(default='')
+    note = models.PositiveIntegerField(default=5, choices=[(i, i) for i in range(1, 6)])
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date_creation']
+
+    def __str__(self):
+        return f"{self.utilisateur.username} sur {self.artiste_nom}"
