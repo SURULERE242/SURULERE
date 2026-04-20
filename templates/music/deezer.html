@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load music_filters %}
-{% block title %}Recherche Deezer — WaveFX{% endblock %}
+{% block title %}Recherche Deezer — SURULERE{% endblock %}
 {% block content %}
 
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
@@ -41,7 +41,12 @@
       {% if track.preview %}<span style="color:var(--green);font-size:11px">✓ Preview</span>
       {% else %}<span style="color:var(--muted);font-size:11px">Non dispo</span>{% endif %}
     </div>
-    <div class="t-dur">{{ track.duration }}s</div>
+    <div class="t-dur" style="display:flex;align-items:center;gap:6px">
+      <button onclick="event.stopPropagation();toggleLike({{ track.id }},'{{ track.title|escapejs }}','{{ track.artist.name|escapejs }}','{{ track.album.cover_medium }}','{{ track.preview }}',{{ track.duration }})"
+        id="like-{{ track.id }}"
+        style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted)">♡</button>
+      {{ track.duration }}s
+    </div>
   </div>
   {% endfor %}
 </div>
@@ -142,6 +147,18 @@ function playDeezer(previewUrl, nom, artiste, cover, duree) {
   document.getElementById('pArtist').textContent = artiste;
   document.getElementById('pTotal').textContent = Math.floor(duree/60)+':'+(duree%60<10?'0':'')+duree%60;
   if (cover) document.getElementById('pThumb').innerHTML = '<img src="'+cover+'" alt="">';
+}
+
+function toggleLike(id, titre, artiste, cover, preview, duree) {
+  fetch('{% url "toggle_like_deezer" %}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCsrf(), 'Content-Type': 'application/json'},
+    body: JSON.stringify({deezer_id: id, titre: titre, artiste: artiste, cover: cover, preview: preview, duree: duree})
+  }).then(r => r.json()).then(d => {
+    const btn = document.getElementById('like-' + id);
+    btn.textContent = d.liked ? '❤' : '♡';
+    btn.style.color = d.liked ? '#e05c5c' : 'var(--muted)';
+  });
 }
 </script>
 {% endblock %}

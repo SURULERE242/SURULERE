@@ -19,9 +19,6 @@
     .app { display: flex; flex: 1; overflow: hidden; }
     .sidebar { width: 220px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
     .logo { padding: 18px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
-    .logo-icon { width: 30px; height: 30px; background: linear-gradient(135deg,var(--acc),var(--acc3)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-    .logo-text { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-    .logo-text span { color: var(--acc2); }
     .nav { padding: 10px 8px; flex: 1; overflow-y: auto; }
     .nav-section { margin-bottom: 20px; }
     .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 0 10px; margin-bottom: 4px; }
@@ -132,14 +129,16 @@
 <div class="app">
   <aside class="sidebar">
     <div class="logo">
-    <img src="{% static 'images/logo.jpg' %}" style="width:120px;height:40px;object-fit:contain;border-radius:6px" alt="BANDIT PROD">
+      <img src="{% static 'images/logo.jpg' %}" style="width:160px;height:50px;object-fit:contain" alt="BANDIT PROD">
     </div>
     <nav class="nav">
       <div class="nav-section">
         <div class="nav-label">Menu</div>
         <a href="{% url 'accueil' %}" class="nav-link {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">⌂ Accueil</a>
         <a href="{% url 'explorer' %}" class="nav-link {% if request.resolver_match.url_name == 'explorer' %}active{% endif %}">◎ Explorer</a>
+        <a href="{% url 'tendances' %}" class="nav-link {% if request.resolver_match.url_name == 'tendances' %}active{% endif %}" style="color:#e05c5c">🔥 Tendances</a>
         <a href="{% url 'mes_favoris' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_favoris' %}active{% endif %}">♡ Favoris</a>
+      <a href="{% url 'mes_likes_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_likes_deezer' %}active{% endif %}" style="color:#e05c5c">❤ Mes Likes Deezer</a>
       </div>
       <div class="nav-section">
         <div class="nav-label">Bibliothèque</div>

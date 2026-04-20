@@ -357,3 +357,61 @@ def playlists_deezer(request):
             playlists[genre_nom] = []
 
     return render(request, 'music/playlists_deezer.html', {'playlists': playlists})
+@login_required
+def tendances(request):
+    tops = {}
+    pays = {
+        'Monde 🌍': 0,
+        'France 🇫🇷': 'fr',
+        'Nigeria 🇳🇬': 'ng',
+        'USA 🇺🇸': 'us',
+        'Cameroun 🇨🇲': 'cm',
+        'Congo 🇨🇬': 'cg',
+        'Côte d\'Ivoire 🇨🇮': 'ci',
+        'Sénégal 🇸🇳': 'sn',
+    }
+    for pays_nom, pays_code in pays.items():
+        if pays_code == 0:
+            url = "https://api.deezer.com/chart/0/tracks?limit=10"
+        else:
+            url = f"https://api.deezer.com/chart/0/tracks?limit=10&country={pays_code}"
+        try:
+            with urllib.request.urlopen(url) as response:
+                data = json.loads(response.read())
+                tops[pays_nom] = data.get('data', [])
+        except Exception:
+            tops[pays_nom] = []
+
+    return render(request, 'music/tendances.html', {'tops': tops})
+@login_required
+@require_POST
+def toggle_like_deezer(request):
+    data = json.loads(request.body)
+    deezer_id = str(data.get('deezer_id'))
+    titre = data.get('titre', '')
+    artiste = data.get('artiste', '')
+    cover = data.get('cover', '')
+    preview = data.get('preview', '')
+    duree = data.get('duree', 0)
+
+    from .models import LikeDeezer
+    like, created = LikeDeezer.objects.get_or_create(
+        utilisateur=request.user,
+        deezer_id=deezer_id,
+        defaults={
+            'titre': titre,
+            'artiste': artiste,
+            'cover': cover,
+            'preview': preview,
+            'duree': duree,
+        }
+    )
+    if not created:
+        like.delete()
+        return JsonResponse({'liked': False})
+    return JsonResponse({'liked': True})
+@login_required
+def mes_likes_deezer(request):
+    from .models import LikeDeezer
+    likes = LikeDeezer.objects.filter(utilisateur=request.user)
+    return render(request, 'music/likes_deezer.html', {'likes': likes})

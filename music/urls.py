@@ -36,4 +36,6 @@ urlpatterns = [
     path('deezer/', views.recherche_deezer, name='recherche_deezer'),
     path('deezer/artiste/<int:artiste_id>/', views.artiste_deezer, name='artiste_deezer'),
     path('playlists-deezer/', views.playlists_deezer, name='playlists_deezer'),
-]
+    path('tendances/', views.tendances, name='tendances'),
+    path('likes-deezer/', views.mes_likes_deezer, name='mes_likes_deezer'),
+    path('likes-deezer/toggle/', views.toggle_like_deezer, name='toggle_like_deezer'),]

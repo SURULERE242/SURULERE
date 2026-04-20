@@ -49,7 +49,6 @@ class Artiste(models.Model):
 
 class Album(models.Model):
     TYPE_CHOICES = [('album', 'Album'), ('ep', 'EP'), ('single', 'Single')]
-
     titre = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, blank=True)
     artiste = models.ForeignKey(Artiste, on_delete=models.CASCADE, related_name='albums')
@@ -187,3 +186,21 @@ class ProfilUtilisateur(models.Model):
 
     def __str__(self):
         return f"Profil de {self.utilisateur.username}"
+
+
+class LikeDeezer(models.Model):
+    utilisateur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='likes_deezer')
+    deezer_id = models.CharField(max_length=50)
+    titre = models.CharField(max_length=200)
+    artiste = models.CharField(max_length=200)
+    cover = models.URLField(blank=True)
+    preview = models.URLField(blank=True)
+    duree = models.PositiveIntegerField(default=0)
+    date_ajout = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['utilisateur', 'deezer_id']
+        ordering = ['-date_ajout']
+
+    def __str__(self):
+        return f"{self.utilisateur.username} ❤ {self.titre}"

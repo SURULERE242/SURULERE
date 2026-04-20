@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Mes Likes Deezer — SURULERE{% endblock %}
+{% block content %}
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+  <div style="font-size:20px;font-weight:700">❤️ Mes Likes Deezer</div>
+  <span style="background:rgba(224,92,92,.2);color:var(--danger);padding:3px 10px;border-radius:12px;font-size:11px">{{ likes|length }} titre{{ likes|length|pluralize }}</span>
+</div>
+
+{% if likes %}
+<div class="track-list">
+  <div class="track-list-header">
+    <span>#</span><span>Titre</span><span>Artiste</span><span>Preview</span><span>Durée</span>
+  </div>
+  {% for like in likes %}
+  <div class="track-row" data-id="deezer-{{ like.deezer_id }}"
+       onclick="playDeezer('{{ like.preview }}','{{ like.titre|escapejs }}','{{ like.artiste|escapejs }}','{{ like.cover }}',{{ like.duree }})">
+    <div class="track-num">{{ forloop.counter }}</div>
+    <div class="track-info">
+      <div class="track-thumb-sm">
+        {% if like.cover %}<img src="{{ like.cover }}" alt="">{% else %}🎵{% endif %}
+      </div>
+      <div>
+        <div class="t-name">{{ like.titre }}</div>
+        <div class="t-artist">{{ like.artiste }}</div>
+      </div>
+    </div>
+    <div class="t-album">{{ like.artiste }}</div>
+    <div class="t-plays">
+      {% if like.preview %}<span style="color:var(--green);font-size:11px">✓ Preview</span>
+      {% else %}<span style="color:var(--muted);font-size:11px">Non dispo</span>{% endif %}
+    </div>
+    <div class="t-dur">{{ like.duree }}s</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="icon">❤️</div>
+  <p style="margin-bottom:8px">Aucun like encore.</p>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Clique sur ❤ sur les titres Deezer pour les ajouter ici !</p>
+  <a href="{% url 'recherche_deezer' %}" class="btn btn-primary">🎵 Découvrir Deezer</a>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+function playDeezer(previewUrl, nom, artiste, cover, duree) {
+  if (!previewUrl) { alert('Preview non disponible pour ce titre.'); return; }
+  const audio = document.getElementById('audio');
+  audio.src = previewUrl;
+  audio.play();
+  document.getElementById('btnPlay').textContent = '⏸';
+  document.getElementById('pName').textContent = nom;
+  document.getElementById('pArtist').textContent = artiste;
+  document.getElementById('pTotal').textContent = Math.floor(duree/60)+':'+(duree%60<10?'0':'')+duree%60;
+  if (cover) document.getElementById('pThumb').innerHTML = '<img src="'+cover+'" alt="">';
+}
+</script>
+{% endblock %}
+{% endblock %}
