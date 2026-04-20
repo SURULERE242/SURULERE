@@ -15,10 +15,35 @@
     <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
       {{ artiste.nb_fan|default:0 }} fans · {{ artiste.nb_album|default:0 }} albums
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
       <button class="btn btn-primary" onclick="playAll()">▶ Tout écouter</button>
       <a href="{% url 'recherche_deezer' %}" class="btn btn-ghost">← Retour</a>
       <a href="{% url 'commentaires_artiste' artiste.id %}" class="btn btn-ghost" style="color:#c4aaff">💬 Commenter</a>
+    </div>
+    <!-- Boutons de partage -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="https://wa.me/?text=Écoute {{ artiste.name }} sur SURULERE : {{ request.build_absolute_uri }}"
+         target="_blank" class="btn btn-ghost" style="color:#25D366;border-color:#25D366">
+        📱 WhatsApp
+      </a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
+         target="_blank" class="btn btn-ghost" style="color:#1877F2;border-color:#1877F2">
+        📘 Facebook
+      </a>
+      <a href="https://twitter.com/intent/tweet?text=Écoute {{ artiste.name }} sur SURULERE&url={{ request.build_absolute_uri }}"
+         target="_blank" class="btn btn-ghost" style="color:#1DA1F2;border-color:#1DA1F2">
+        🐦 Twitter
+      </a>
+      <a href="https://www.snapchat.com/scan?attachmentUrl={{ request.build_absolute_uri }}"
+         target="_blank" class="btn btn-ghost" style="color:#FFFC00;border-color:#FFFC00">
+        👻 Snapchat
+      </a>
+      <button onclick="partagerInstagram()" class="btn btn-ghost" style="color:#E1306C;border-color:#E1306C">
+        📸 Instagram
+      </button>
+      <button onclick="copyLink()" class="btn btn-ghost" style="color:var(--acc3)">
+        🔗 Copier le lien
+      </button>
     </div>
   </div>
 </div>
@@ -95,6 +120,18 @@ function toggleLike(id, titre, artiste, cover, preview, duree) {
     const btn = document.getElementById('like-' + id);
     btn.textContent = d.liked ? '❤' : '♡';
     btn.style.color = d.liked ? '#e05c5c' : 'var(--muted)';
+  });
+}
+
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert('🔗 Lien copié dans le presse-papiers !');
+  });
+}
+
+function partagerInstagram() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert('📸 Lien copié ! Colle-le dans ta story Instagram.');
   });
 }
 </script>
