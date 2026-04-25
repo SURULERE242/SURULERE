@@ -112,6 +112,33 @@
     .hero-cover img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
     .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); }
     .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+    /* ── MOBILE RESPONSIVE ── */
+    .menu-btn { display: none; background: none; border: none; color: var(--text); cursor: pointer; font-size: 22px; padding: 4px 8px; }
+    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.6); z-index: 99; }
+
+    @media (max-width: 768px) {
+      .sidebar { position: fixed; left: -240px; top: 0; height: 100vh; z-index: 100; transition: left .3s ease; width: 240px; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,.5); }
+      .overlay.active { display: block; }
+      .main { width: 100%; }
+      .topbar { padding: 10px 12px; gap: 8px; }
+      .search-form { max-width: 100%; flex: 1; }
+      .topbar-right .btn-ghost { display: none; }
+      .content { padding: 14px; }
+      .card-grid { grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap: 8px; }
+      .track-list-header, .track-row { grid-template-columns: 28px 1fr 60px; gap: 4px; padding: 6px 10px; }
+      .t-album, .t-plays { display: none; }
+      .player { padding: 0 10px; gap: 6px; height: 64px; }
+      .player-left { width: 130px; }
+      .player-right { width: 70px; }
+      .vol-bar { display: none; }
+      .hero-section { padding: 14px; gap: 12px; flex-direction: row; flex-wrap: wrap; }
+      .hero-cover { width: 70px; height: 70px; font-size: 24px; }
+      .menu-btn { display: flex; align-items: center; justify-content: center; }
+      .section-title { font-size: 14px; }
+      .form-card { padding: 18px; }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -126,34 +153,35 @@
 {% endif %}
 
 {% if user.is_authenticated %}
+<div class="overlay" id="overlay" onclick="fermerMenu()"></div>
 <div class="app">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="logo">
       <img src="{% static 'images/logo.jpg' %}" style="width:160px;height:50px;object-fit:contain" alt="BANDIT PROD">
     </div>
     <nav class="nav">
       <div class="nav-section">
         <div class="nav-label">Menu</div>
-        <a href="{% url 'accueil' %}" class="nav-link {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">⌂ Accueil</a>
-        <a href="{% url 'explorer' %}" class="nav-link {% if request.resolver_match.url_name == 'explorer' %}active{% endif %}">◎ Explorer</a>
-        <a href="{% url 'tendances' %}" class="nav-link {% if request.resolver_match.url_name == 'tendances' %}active{% endif %}" style="color:#e05c5c">🔥 Tendances</a>
-        <a href="{% url 'mes_favoris' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_favoris' %}active{% endif %}">♡ Favoris</a>
-      <a href="{% url 'mes_likes_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_likes_deezer' %}active{% endif %}" style="color:#e05c5c">❤ Mes Likes Deezer</a>
+        <a href="{% url 'accueil' %}" class="nav-link {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}" onclick="fermerMenu()">⌂ Accueil</a>
+        <a href="{% url 'explorer' %}" class="nav-link {% if request.resolver_match.url_name == 'explorer' %}active{% endif %}" onclick="fermerMenu()">◎ Explorer</a>
+        <a href="{% url 'tendances' %}" class="nav-link {% if request.resolver_match.url_name == 'tendances' %}active{% endif %}" style="color:#e05c5c" onclick="fermerMenu()">🔥 Tendances</a>
+        <a href="{% url 'mes_favoris' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_favoris' %}active{% endif %}" onclick="fermerMenu()">♡ Favoris</a>
+        <a href="{% url 'mes_likes_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_likes_deezer' %}active{% endif %}" style="color:#e05c5c" onclick="fermerMenu()">❤ Mes Likes Deezer</a>
       </div>
       <div class="nav-section">
         <div class="nav-label">Bibliothèque</div>
-        <a href="{% url 'mes_playlists' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_playlists' %}active{% endif %}">▤ Playlists</a>
-        <a href="{% url 'ajouter_titre' %}" class="nav-link">♪ Ajouter un titre</a>
-        <a href="{% url 'profil' %}" class="nav-link {% if request.resolver_match.url_name == 'profil' %}active{% endif %}">☺ Profil</a>
-        <a href="{% url 'recherche_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'recherche_deezer' %}active{% endif %}" style="color:#a238ff">🎵 Deezer</a>
-        <a href="{% url 'playlists_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'playlists_deezer' %}active{% endif %}" style="color:#1db954">🎵 Playlists Deezer</a>
+        <a href="{% url 'mes_playlists' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_playlists' %}active{% endif %}" onclick="fermerMenu()">▤ Playlists</a>
+        <a href="{% url 'ajouter_titre' %}" class="nav-link" onclick="fermerMenu()">♪ Ajouter un titre</a>
+        <a href="{% url 'profil' %}" class="nav-link {% if request.resolver_match.url_name == 'profil' %}active{% endif %}" onclick="fermerMenu()">☺ Profil</a>
+        <a href="{% url 'recherche_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'recherche_deezer' %}active{% endif %}" style="color:#a238ff" onclick="fermerMenu()">🎵 Deezer</a>
+        <a href="{% url 'playlists_deezer' %}" class="nav-link {% if request.resolver_match.url_name == 'playlists_deezer' %}active{% endif %}" style="color:#1db954" onclick="fermerMenu()">🎵 Playlists Deezer</a>
       </div>
       {% with playlists=request.user.playlists.all|slice:":5" %}
       {% if playlists %}
       <div class="nav-section">
         <div class="nav-label">Mes playlists</div>
         {% for pl in playlists %}
-        <a href="{% url 'detail_playlist' pl.slug %}" class="pl-item">
+        <a href="{% url 'detail_playlist' pl.slug %}" class="pl-item" onclick="fermerMenu()">
           <div class="pl-thumb">{{ pl.nom|first|upper }}</div>
           <span>{{ pl.nom }}</span>
         </a>
@@ -166,6 +194,7 @@
 
   <div class="main">
     <div class="topbar">
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
       <form class="search-form" action="{% url 'recherche' %}" method="get">
         <span style="color:var(--muted)">⌕</span>
         <input type="text" name="q" placeholder="Rechercher..." value="{{ request.GET.q }}">
@@ -293,6 +322,16 @@ btnFav && btnFav.addEventListener('click', () => {
       btnFav.style.color = d.favori ? '#e05c5c' : '';
     });
 });
+
+function toggleMenu() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('active');
+}
+
+function fermerMenu() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('active');
+}
 
 setTimeout(() => { document.querySelectorAll('.msg').forEach(m => m.remove()); }, 4000);
 </script>
