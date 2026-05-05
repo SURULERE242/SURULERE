@@ -323,16 +323,38 @@ def recherche_deezer(request):
 @login_required
 def artiste_deezer(request, artiste_id):
     try:
-        url = f"https://api.deezer.com/artist/{artiste_id}/top?limit=20"
+        # Infos artiste
+        url = f"https://api.deezer.com/artist/{artiste_id}"
         with urllib.request.urlopen(url) as response:
-            data = json.loads(response.read())
-            titres = data.get('data', [])
-        url2 = f"https://api.deezer.com/artist/{artiste_id}"
+            artiste = json.loads(response.read())
+
+        # Titres populaires
+        url2 = f"https://api.deezer.com/artist/{artiste_id}/top?limit=10"
         with urllib.request.urlopen(url2) as response2:
-            artiste = json.loads(response2.read())
+            titres_data = json.loads(response2.read())
+            titres = titres_data.get('data', [])
+
+        # Albums
+        url3 = f"https://api.deezer.com/artist/{artiste_id}/albums?limit=12"
+        with urllib.request.urlopen(url3) as response3:
+            albums_data = json.loads(response3.read())
+            albums = albums_data.get('data', [])
+
+        # Artistes similaires
+        url4 = f"https://api.deezer.com/artist/{artiste_id}/related?limit=6"
+        with urllib.request.urlopen(url4) as response4:
+            related_data = json.loads(response4.read())
+            artistes_similaires = related_data.get('data', [])
+
     except Exception:
-        titres, artiste = [], {}
-    return render(request, 'music/deezer_artiste.html', {'titres': titres, 'artiste': artiste})
+        titres, artiste, albums, artistes_similaires = [], {}, [], []
+
+    return render(request, 'music/deezer_artiste.html', {
+        'titres': titres,
+        'artiste': artiste,
+        'albums': albums,
+        'artistes_similaires': artistes_similaires,
+    })      
 @login_required
 def playlists_deezer(request):
     playlists_genres = {
@@ -469,3 +491,110 @@ def supprimer_commentaire(request, commentaire_id):
     commentaire.delete()
     messages.success(request, "Commentaire supprimé !")
     return redirect('commentaires_artiste', artiste_id=artiste_id)
+@login_required
+def concerts(request):
+    q = request.GET.get('q', '').strip()
+    concerts_data = []
+    artiste_info = {}
+
+    if q:
+        try:
+            # Chercher l'artiste
+            url = f"https://api.deezer.com/search/artist?q={urllib.parse.quote(q)}&limit=1"
+            with urllib.request.urlopen(url) as response:
+                data = json.loads(response.read())
+                artistes = data.get('data', [])
+                if artistes:
+                    artiste_info = artistes[0]
+        except Exception:
+            pass
+
+    # Concerts prédéfinis populaires
+    concerts_predefinies = [
+        {
+            'artiste': 'Fally Ipupa',
+            'titre': 'Fally Ipupa Live',
+            'lieu': 'Paris, France',
+            'date': '2 - 3 Mai 2026',
+            'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Fally_Ipupa.jpg/440px-Fally_Ipupa.jpg',
+            'description': 'Le roi de la rumba congolaise en concert exceptionnel à Paris !',
+            'lien': 'https://www.deezer.com/artist/4438022',
+            'deezer_id': '4438022',
+        },
+        {
+            'artiste': 'Burna Boy',
+            'titre': 'African Giant World Tour',
+            'lieu': 'Londres, UK',
+            'date': '10 Mai 2026',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/4429712/500x500.jpg',
+            'description': 'Burna Boy continue sa tournée mondiale avec un show explosif !',
+            'lien': 'https://www.deezer.com/artist/4429712',
+            'deezer_id': '4429712',
+        },
+        {
+            'artiste': 'Drake',
+            'titre': 'Drake World Tour',
+            'lieu': 'New York, USA',
+            'date': '15 Mai 2026',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/246791/500x500.jpg',
+            'description': 'Drake en concert à New York dans une soirée inoubliable !',
+            'lien': 'https://www.deezer.com/artist/246791',
+            'deezer_id': '246791',
+        },
+        {
+            'artiste': 'Wizkid',
+            'titre': 'Wizkid Live',
+            'lieu': 'Lagos, Nigeria',
+            'date': '20 Mai 2026',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/1591082/500x500.jpg',
+            'description': 'Wizkid fait vibrer Lagos avec son Afrobeats envoûtant !',
+            'lien': 'https://www.deezer.com/artist/1591082',
+            'deezer_id': '1591082',
+        },
+        {
+            'artiste': 'Ninho',
+            'titre': 'Ninho Tour 2026',
+            'lieu': 'Lyon, France',
+            'date': '25 Mai 2026',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/955515/500x500.jpg',
+            'description': 'Le rappeur français N°1 en tournée dans toute la France !',
+            'lien': 'https://www.deezer.com/artist/955515',
+            'deezer_id': '955515',
+        },
+        {
+            'artiste': 'Davido',
+            'titre': 'Davido Live Concert',
+            'lieu': 'Abuja, Nigeria',
+            'date': '1 Juin 2026',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/1620785/500x500.jpg',
+            'description': 'Davido enflamme la scène nigériane !',
+            'lien': 'https://www.deezer.com/artist/1620785',
+            'deezer_id': '1620785',
+        },
+        {
+            'artiste': 'Chris Brown',
+            'titre': 'Chris Brown Tour',
+            'lieu': 'Atlanta, USA',
+            'date': '5 Juin 2026',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/5313127/500x500.jpg',
+            'description': 'Chris Brown dans un spectacle de danse et musique extraordinaire !',
+            'lien': 'https://www.deezer.com/artist/5313127',
+            'deezer_id': '5313127',
+        },
+        {
+            'artiste': 'Rihanna',
+            'titre': 'Rihanna Comeback Tour',
+            'lieu': 'Barbados',
+            'date': '10 Juin 2026',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/63034/500x500.jpg',
+            'description': 'Le grand retour de Rihanna sur scène !',
+            'lien': 'https://www.deezer.com/artist/63034',
+            'deezer_id': '63034',
+        },
+    ]
+
+    return render(request, 'music/concerts.html', {
+        'concerts': concerts_predefinies,
+        'q': q,
+        'artiste_info': artiste_info,
+    })

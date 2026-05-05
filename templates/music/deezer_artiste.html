@@ -5,57 +5,62 @@
 {% if artiste %}
 <div class="hero-section">
   <div class="hero-cover" style="border-radius:50%">
-    {% if artiste.picture_medium %}
-    <img src="{{ artiste.picture_medium }}" alt="{{ artiste.name }}" style="border-radius:50%">
+    {% if artiste.picture_xl %}
+    <img src="{{ artiste.picture_xl }}" alt="{{ artiste.name }}" style="border-radius:50%;width:100%;height:100%;object-fit:cover">
     {% else %}🎤{% endif %}
   </div>
-  <div>
+  <div style="flex:1">
     <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Artiste · Deezer</div>
-    <div style="font-size:26px;font-weight:700;margin-bottom:6px">{{ artiste.name }}</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
-      {{ artiste.nb_fan|default:0 }} fans · {{ artiste.nb_album|default:0 }} albums
+    <div style="font-size:28px;font-weight:700;margin-bottom:6px">{{ artiste.name }}</div>
+    <div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--acc3)">{{ artiste.nb_fan|default:0 }}</div>
+        <div style="font-size:11px;color:var(--muted)">Fans</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--acc3)">{{ artiste.nb_album|default:0 }}</div>
+        <div style="font-size:11px;color:var(--muted)">Albums</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--acc3)">{{ titres|length }}</div>
+        <div style="font-size:11px;color:var(--muted)">Top Titres</div>
+      </div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
       <button class="btn btn-primary" onclick="playAll()">▶ Tout écouter</button>
       <a href="{% url 'recherche_deezer' %}" class="btn btn-ghost">← Retour</a>
       <a href="{% url 'commentaires_artiste' artiste.id %}" class="btn btn-ghost" style="color:#c4aaff">💬 Commenter</a>
     </div>
+    <!-- Boutons de partage -->
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <!-- WhatsApp -->
       <a href="https://wa.me/?text=Écoute {{ artiste.name }} sur SURULERE : {{ request.build_absolute_uri }}"
          target="_blank" class="btn btn-ghost" style="color:#25D366;border-color:#25D366;display:flex;align-items:center;gap:6px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
         WhatsApp
       </a>
-      <!-- Facebook -->
       <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
          target="_blank" class="btn btn-ghost" style="color:#1877F2;border-color:#1877F2;display:flex;align-items:center;gap:6px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         Facebook
       </a>
-      <!-- X Twitter -->
       <a href="https://twitter.com/intent/tweet?text=Écoute {{ artiste.name }} sur SURULERE&url={{ request.build_absolute_uri }}"
          target="_blank" class="btn btn-ghost" style="color:#000;border-color:#000;display:flex;align-items:center;gap:6px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.26 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         X
       </a>
-      <!-- Instagram -->
       <button onclick="partagerInstagram()" class="btn btn-ghost" style="color:#E1306C;border-color:#E1306C;display:flex;align-items:center;gap:6px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="#E1306C"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
         Instagram
       </button>
-      <!-- TikTok -->
       <button onclick="partagerTikTok()" class="btn btn-ghost" style="color:#000;border-color:#000;display:flex;align-items:center;gap:6px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
         TikTok
       </button>
-      <!-- YouTube -->
       <a href="https://www.youtube.com/results?search_query={{ artiste.name }}"
          target="_blank" class="btn btn-ghost" style="color:#FF0000;border-color:#FF0000;display:flex;align-items:center;gap:6px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
         YouTube
       </button>
-      <!-- Copier le lien -->
       <button onclick="copyLink()" class="btn btn-ghost" style="color:var(--acc3);display:flex;align-items:center;gap:6px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         Copier le lien
@@ -65,9 +70,10 @@
 </div>
 {% endif %}
 
+<!-- Titres populaires -->
 {% if titres %}
 <div class="section-head"><span class="section-title">🔥 Titres populaires</span></div>
-<div class="track-list">
+<div class="track-list" style="margin-bottom:28px">
   <div class="track-list-header">
     <span>#</span><span>Titre</span><span>Album</span><span>Preview</span><span>Durée</span>
   </div>
@@ -96,8 +102,42 @@
   </div>
   {% endfor %}
 </div>
-{% else %}
-<div class="empty-state"><div class="icon">🎵</div><p>Aucun titre disponible.</p></div>
+{% endif %}
+
+<!-- Albums -->
+{% if albums %}
+<div class="section-head"><span class="section-title">💿 Discographie</span></div>
+<div class="card-grid" style="margin-bottom:28px">
+  {% for album in albums %}
+  <a href="{% url 'recherche_deezer' %}?q={{ album.title|urlencode }}" class="music-card">
+    <div class="card-cover">
+      {% if album.cover_medium %}<img src="{{ album.cover_medium }}" alt="{{ album.title }}">
+      {% else %}💿{% endif %}
+      <div class="play-overlay">▶</div>
+    </div>
+    <div class="card-title">{{ album.title }}</div>
+    <div class="card-sub">{{ album.release_date|default:"" }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Artistes similaires -->
+{% if artistes_similaires %}
+<div class="section-head"><span class="section-title">🎤 Artistes similaires</span></div>
+<div class="card-grid" style="margin-bottom:28px">
+  {% for a in artistes_similaires %}
+  <a href="{% url 'artiste_deezer' a.id %}" class="music-card">
+    <div class="card-cover" style="border-radius:50%">
+      {% if a.picture_medium %}<img src="{{ a.picture_medium }}" alt="{{ a.name }}" style="border-radius:50%">
+      {% else %}🎤{% endif %}
+      <div class="play-overlay" style="border-radius:50%">▶</div>
+    </div>
+    <div class="card-title" style="text-align:center">{{ a.name }}</div>
+    <div class="card-sub" style="text-align:center">{{ a.nb_fan|default:0 }} fans</div>
+  </a>
+  {% endfor %}
+</div>
 {% endif %}
 
 {% block extra_js %}

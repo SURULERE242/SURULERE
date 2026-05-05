@@ -41,4 +41,5 @@ urlpatterns = [
     path('likes-deezer/toggle/', views.toggle_like_deezer, name='toggle_like_deezer'),
     path('commentaires/artiste/<int:artiste_id>/', views.commentaires_artiste, name='commentaires_artiste'),
     path('commentaires/supprimer/<int:commentaire_id>/', views.supprimer_commentaire, name='supprimer_commentaire'),
-    ]
+   path('concerts/', views.concerts, name='concerts'),
+     ]
