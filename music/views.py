@@ -495,7 +495,6 @@ def supprimer_commentaire(request, commentaire_id):
 @login_required
 def concerts(request):
     q = request.GET.get('q', '').strip()
-    concerts_data = []
     artiste_info = {}
 
     if q:
@@ -509,7 +508,7 @@ def concerts(request):
         except Exception:
             pass
 
-    # Concerts prédéfinis (images récupérées dynamiquement)
+    # Concerts avec images directes (URLs fixes Deezer)
     concerts_predefinies = [
         {
             'artiste': 'Fally Ipupa',
@@ -518,6 +517,7 @@ def concerts(request):
             'date': '2 - 3 Mai 2026',
             'description': 'Le roi de la rumba congolaise en concert exceptionnel à Paris !',
             'deezer_id': '4438022',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/4438022/500x500-000000-80-0-0.jpg',
         },
         {
             'artiste': 'Burna Boy',
@@ -526,6 +526,7 @@ def concerts(request):
             'date': '10 Mai 2026',
             'description': 'Burna Boy continue sa tournée mondiale avec un show explosif !',
             'deezer_id': '4429712',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/4429712/500x500-000000-80-0-0.jpg',
         },
         {
             'artiste': 'Drake',
@@ -534,6 +535,7 @@ def concerts(request):
             'date': '15 Mai 2026',
             'description': 'Drake en concert à New York dans une soirée inoubliable !',
             'deezer_id': '246791',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/246791/500x500-000000-80-0-0.jpg',
         },
         {
             'artiste': 'Wizkid',
@@ -542,6 +544,7 @@ def concerts(request):
             'date': '20 Mai 2026',
             'description': 'Wizkid fait vibrer Lagos avec son Afrobeats envoûtant !',
             'deezer_id': '1591082',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/1591082/500x500-000000-80-0-0.jpg',
         },
         {
             'artiste': 'Ninho',
@@ -550,6 +553,7 @@ def concerts(request):
             'date': '25 Mai 2026',
             'description': 'Le rappeur français N°1 en tournée dans toute la France !',
             'deezer_id': '955515',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/955515/500x500-000000-80-0-0.jpg',
         },
         {
             'artiste': 'Davido',
@@ -558,6 +562,7 @@ def concerts(request):
             'date': '1 Juin 2026',
             'description': 'Davido enflamme la scène nigériane !',
             'deezer_id': '1620785',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/1620785/500x500-000000-80-0-0.jpg',
         },
         {
             'artiste': 'Chris Brown',
@@ -566,6 +571,7 @@ def concerts(request):
             'date': '5 Juin 2026',
             'description': 'Chris Brown dans un spectacle de danse et musique extraordinaire !',
             'deezer_id': '5313127',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/5313127/500x500-000000-80-0-0.jpg',
         },
         {
             'artiste': 'Rihanna',
@@ -574,18 +580,9 @@ def concerts(request):
             'date': '10 Juin 2026',
             'description': 'Le grand retour de Rihanna sur scène !',
             'deezer_id': '63034',
+            'image': 'https://e-cdns-images.dzcdn.net/images/artist/63034/500x500-000000-80-0-0.jpg',
         },
     ]
-
-    # Récupérer les photos depuis Deezer
-    for concert in concerts_predefinies:
-        try:
-            url = f"https://api.deezer.com/artist/{concert['deezer_id']}"
-            with urllib.request.urlopen(url) as response:
-                artiste_data = json.loads(response.read())
-                concert['image'] = artiste_data.get('picture_xl', artiste_data.get('picture_big', ''))
-        except Exception:
-            concert['image'] = ''
 
     return render(request, 'music/concerts.html', {
         'concerts': concerts_predefinies,
