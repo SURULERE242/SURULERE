@@ -9,10 +9,12 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q, Count
 from django.views.decorators.http import require_POST
+from django.templatetags.static import static
 
 from .models import (
     Titre, Album, Artiste, Playlist, Genre,
-    FavoriTitre, Historique, ProfilUtilisateur, PlaylistTitre
+    FavoriTitre, Historique, ProfilUtilisateur, PlaylistTitre,
+    LikeDeezer, CommentaireDeezer
 )
 from .forms import InscriptionForm, ConnexionForm, TitreForm, PlaylistForm, ArtisteForm
 
@@ -354,6 +356,32 @@ def artiste_deezer(request, artiste_id):
 
 
 @login_required
+def playlists_deezer(request):
+    playlists_genres = {
+        'Hip-Hop 🎤': 116,
+        'Afrobeats 🌍': 2309,
+        'R&B 🎶': 15,
+        'Pop ⭐': 132,
+        'Rock 🎸': 152,
+        'Jazz 🎷': 129,
+        'Electronique 🎧': 106,
+        'Reggae 🌿': 144,
+    }
+
+    playlists = {}
+    for genre_nom, genre_id in playlists_genres.items():
+        url = f"https://api.deezer.com/chart/{genre_id}/tracks?limit=15"
+        try:
+            with urllib.request.urlopen(url) as response:
+                data = json.loads(response.read())
+                playlists[genre_nom] = data.get('data', [])
+        except Exception:
+            playlists[genre_nom] = []
+
+    return render(request, 'music/playlists_deezer.html', {'playlists': playlists})
+
+
+@login_required
 def tendances(request):
     tops = {}
     pays = {
@@ -363,7 +391,7 @@ def tendances(request):
         'USA 🇺🇸': 'us',
         'Cameroun 🇨🇲': 'cm',
         'Congo 🇨🇬': 'cg',
-        "Côte d'Ivoire 🇨🇮": 'ci',
+        'Côte d\'Ivoire 🇨🇮': 'ci',
         'Sénégal 🇸🇳': 'sn',
     }
     for pays_nom, pays_code in pays.items():
@@ -392,7 +420,6 @@ def toggle_like_deezer(request):
     preview = data.get('preview', '')
     duree = data.get('duree', 0)
 
-    from .models import LikeDeezer
     like, created = LikeDeezer.objects.get_or_create(
         utilisateur=request.user,
         deezer_id=deezer_id,
@@ -412,41 +439,12 @@ def toggle_like_deezer(request):
 
 @login_required
 def mes_likes_deezer(request):
-    from .models import LikeDeezer
     likes = LikeDeezer.objects.filter(utilisateur=request.user)
     return render(request, 'music/likes_deezer.html', {'likes': likes})
 
 
 @login_required
-def playlists_deezer(request):
-    playlists_genres = {
-        'Hip-Hop 🎤': 116,
-        'Afrobeats 🌍': 2309,
-        'R&B 🎶': 15,
-        'Pop ⭐': 132,
-        'Rock 🎸': 152,
-        'Jazz 🎷': 129,
-        'Electronique 🎧': 106,
-        'Reggae 🌿': 144,
-    }
-
-    playlists = {}
-    for genre_nom, genre_id in playlists_genres.items():
-        url = f"https://api.deezer.com/chart/{genre_id}/tracks?limit=15"
-        try:
-            with urllib.request.urlopen(url) as response:
-                data = json.loads(response.read())
-                playlists[genre_nom] = data.get('data', [])
-        except Exception:
-            playlists[genre_nom] = []
-
-    return render(request, 'music/playlists_deezer.html', {'playlists': playlists})
-
-
-@login_required
 def commentaires_artiste(request, artiste_id):
-    from .models import CommentaireDeezer
-
     artiste = {}
     try:
         url = f"https://api.deezer.com/artist/{artiste_id}"
@@ -488,7 +486,6 @@ def commentaires_artiste(request, artiste_id):
 @login_required
 @require_POST
 def supprimer_commentaire(request, commentaire_id):
-    from .models import CommentaireDeezer
     commentaire = get_object_or_404(CommentaireDeezer, pk=commentaire_id, utilisateur=request.user)
     artiste_id = commentaire.deezer_artiste_id
     commentaire.delete()
@@ -498,6 +495,21 @@ def supprimer_commentaire(request, commentaire_id):
 
 @login_required
 def concerts(request):
+    q = request.GET.get('q', '').strip()
+    artiste_info = {}
+
+    if q:
+        try:
+            url = f"https://api.deezer.com/search/artist?q={urllib.parse.quote(q)}&limit=1"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=5) as response:
+                data = json.loads(response.read())
+                artistes = data.get('data', [])
+                if artistes:
+                    artiste_info = artistes[0]
+        except Exception:
+            pass
+
     concerts_predefinies = [
         {
             'artiste': 'Fally Ipupa',
@@ -565,16 +577,12 @@ def concerts(request):
         },
     ]
 
-    # Récupérer les photos depuis Deezer
+    # Ajout du chemin vers l'image locale pour chaque concert
     for concert in concerts_predefinies:
-        try:
-            url = f"https://api.deezer.com/artist/{concert['deezer_id']}"
-            with urllib.request.urlopen(url) as response:
-                artiste_data = json.loads(response.read())
-                concert['image'] = artiste_data.get('picture_xl', artiste_data.get('picture_big', ''))
-        except Exception:
-            concert['image'] = ''
+        concert['image'] = static(f'music/images/concerts/{concert["deezer_id"]}.jpg')
 
     return render(request, 'music/concerts.html', {
         'concerts': concerts_predefinies,
+        'q': q,
+        'artiste_info': artiste_info,
     })
