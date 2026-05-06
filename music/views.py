@@ -12,7 +12,8 @@ from django.views.decorators.http import require_POST
 
 from .models import (
     Titre, Album, Artiste, Playlist, Genre,
-    FavoriTitre, Historique, ProfilUtilisateur, PlaylistTitre
+    FavoriTitre, Historique, ProfilUtilisateur, PlaylistTitre,
+    LikeDeezer, CommentaireDeezer
 )
 from .forms import InscriptionForm, ConnexionForm, TitreForm, PlaylistForm, ArtisteForm
 
@@ -323,24 +324,20 @@ def recherche_deezer(request):
 @login_required
 def artiste_deezer(request, artiste_id):
     try:
-        # Infos artiste
         url = f"https://api.deezer.com/artist/{artiste_id}"
         with urllib.request.urlopen(url) as response:
             artiste = json.loads(response.read())
 
-        # Titres populaires
         url2 = f"https://api.deezer.com/artist/{artiste_id}/top?limit=10"
         with urllib.request.urlopen(url2) as response2:
             titres_data = json.loads(response2.read())
             titres = titres_data.get('data', [])
 
-        # Albums
         url3 = f"https://api.deezer.com/artist/{artiste_id}/albums?limit=12"
         with urllib.request.urlopen(url3) as response3:
             albums_data = json.loads(response3.read())
             albums = albums_data.get('data', [])
 
-        # Artistes similaires
         url4 = f"https://api.deezer.com/artist/{artiste_id}/related?limit=6"
         with urllib.request.urlopen(url4) as response4:
             related_data = json.loads(response4.read())
@@ -354,7 +351,9 @@ def artiste_deezer(request, artiste_id):
         'artiste': artiste,
         'albums': albums,
         'artistes_similaires': artistes_similaires,
-    })      
+    })
+
+
 @login_required
 def playlists_deezer(request):
     playlists_genres = {
@@ -379,6 +378,8 @@ def playlists_deezer(request):
             playlists[genre_nom] = []
 
     return render(request, 'music/playlists_deezer.html', {'playlists': playlists})
+
+
 @login_required
 def tendances(request):
     tops = {}
@@ -405,6 +406,8 @@ def tendances(request):
             tops[pays_nom] = []
 
     return render(request, 'music/tendances.html', {'tops': tops})
+
+
 @login_required
 @require_POST
 def toggle_like_deezer(request):
@@ -416,7 +419,6 @@ def toggle_like_deezer(request):
     preview = data.get('preview', '')
     duree = data.get('duree', 0)
 
-    from .models import LikeDeezer
     like, created = LikeDeezer.objects.get_or_create(
         utilisateur=request.user,
         deezer_id=deezer_id,
@@ -432,16 +434,16 @@ def toggle_like_deezer(request):
         like.delete()
         return JsonResponse({'liked': False})
     return JsonResponse({'liked': True})
+
+
 @login_required
 def mes_likes_deezer(request):
-    from .models import LikeDeezer
     likes = LikeDeezer.objects.filter(utilisateur=request.user)
     return render(request, 'music/likes_deezer.html', {'likes': likes})
+
+
 @login_required
 def commentaires_artiste(request, artiste_id):
-    from .models import CommentaireDeezer
-    
-    # Récupérer les infos de l'artiste depuis Deezer
     artiste = {}
     try:
         url = f"https://api.deezer.com/artist/{artiste_id}"
@@ -450,7 +452,6 @@ def commentaires_artiste(request, artiste_id):
     except Exception:
         pass
 
-    # Ajouter un commentaire
     if request.method == 'POST':
         contenu = request.POST.get('contenu', '').strip()
         note = request.POST.get('note', 5)
@@ -469,7 +470,6 @@ def commentaires_artiste(request, artiste_id):
         deezer_artiste_id=str(artiste_id)
     ).select_related('utilisateur')
 
-    # Calculer la note moyenne
     note_moyenne = 0
     if commentaires:
         note_moyenne = sum(c.note for c in commentaires) / len(commentaires)
@@ -485,12 +485,13 @@ def commentaires_artiste(request, artiste_id):
 @login_required
 @require_POST
 def supprimer_commentaire(request, commentaire_id):
-    from .models import CommentaireDeezer
     commentaire = get_object_or_404(CommentaireDeezer, pk=commentaire_id, utilisateur=request.user)
     artiste_id = commentaire.deezer_artiste_id
     commentaire.delete()
     messages.success(request, "Commentaire supprimé !")
     return redirect('commentaires_artiste', artiste_id=artiste_id)
+
+
 @login_required
 def concerts(request):
     q = request.GET.get('q', '').strip()
@@ -499,7 +500,6 @@ def concerts(request):
 
     if q:
         try:
-            # Chercher l'artiste
             url = f"https://api.deezer.com/search/artist?q={urllib.parse.quote(q)}&limit=1"
             with urllib.request.urlopen(url) as response:
                 data = json.loads(response.read())
@@ -509,16 +509,14 @@ def concerts(request):
         except Exception:
             pass
 
-    # Concerts prédéfinis populaires
+    # Concerts prédéfinis (images récupérées dynamiquement)
     concerts_predefinies = [
         {
             'artiste': 'Fally Ipupa',
             'titre': 'Fally Ipupa Live',
             'lieu': 'Paris, France',
             'date': '2 - 3 Mai 2026',
-            'image': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Fally_Ipupa.jpg/440px-Fally_Ipupa.jpg',
             'description': 'Le roi de la rumba congolaise en concert exceptionnel à Paris !',
-            'lien': 'https://www.deezer.com/artist/4438022',
             'deezer_id': '4438022',
         },
         {
@@ -526,9 +524,7 @@ def concerts(request):
             'titre': 'African Giant World Tour',
             'lieu': 'Londres, UK',
             'date': '10 Mai 2026',
-            'image': 'https://e-cdns-images.dzcdn.net/images/artist/4429712/500x500.jpg',
             'description': 'Burna Boy continue sa tournée mondiale avec un show explosif !',
-            'lien': 'https://www.deezer.com/artist/4429712',
             'deezer_id': '4429712',
         },
         {
@@ -536,9 +532,7 @@ def concerts(request):
             'titre': 'Drake World Tour',
             'lieu': 'New York, USA',
             'date': '15 Mai 2026',
-            'image': 'https://e-cdns-images.dzcdn.net/images/artist/246791/500x500.jpg',
             'description': 'Drake en concert à New York dans une soirée inoubliable !',
-            'lien': 'https://www.deezer.com/artist/246791',
             'deezer_id': '246791',
         },
         {
@@ -546,9 +540,7 @@ def concerts(request):
             'titre': 'Wizkid Live',
             'lieu': 'Lagos, Nigeria',
             'date': '20 Mai 2026',
-            'image': 'https://e-cdns-images.dzcdn.net/images/artist/1591082/500x500.jpg',
             'description': 'Wizkid fait vibrer Lagos avec son Afrobeats envoûtant !',
-            'lien': 'https://www.deezer.com/artist/1591082',
             'deezer_id': '1591082',
         },
         {
@@ -556,9 +548,7 @@ def concerts(request):
             'titre': 'Ninho Tour 2026',
             'lieu': 'Lyon, France',
             'date': '25 Mai 2026',
-            'image': 'https://e-cdns-images.dzcdn.net/images/artist/955515/500x500.jpg',
             'description': 'Le rappeur français N°1 en tournée dans toute la France !',
-            'lien': 'https://www.deezer.com/artist/955515',
             'deezer_id': '955515',
         },
         {
@@ -566,9 +556,7 @@ def concerts(request):
             'titre': 'Davido Live Concert',
             'lieu': 'Abuja, Nigeria',
             'date': '1 Juin 2026',
-            'image': 'https://e-cdns-images.dzcdn.net/images/artist/1620785/500x500.jpg',
             'description': 'Davido enflamme la scène nigériane !',
-            'lien': 'https://www.deezer.com/artist/1620785',
             'deezer_id': '1620785',
         },
         {
@@ -576,9 +564,7 @@ def concerts(request):
             'titre': 'Chris Brown Tour',
             'lieu': 'Atlanta, USA',
             'date': '5 Juin 2026',
-            'image': 'https://e-cdns-images.dzcdn.net/images/artist/5313127/500x500.jpg',
             'description': 'Chris Brown dans un spectacle de danse et musique extraordinaire !',
-            'lien': 'https://www.deezer.com/artist/5313127',
             'deezer_id': '5313127',
         },
         {
@@ -586,12 +572,20 @@ def concerts(request):
             'titre': 'Rihanna Comeback Tour',
             'lieu': 'Barbados',
             'date': '10 Juin 2026',
-            'image': 'https://e-cdns-images.dzcdn.net/images/artist/63034/500x500.jpg',
             'description': 'Le grand retour de Rihanna sur scène !',
-            'lien': 'https://www.deezer.com/artist/63034',
             'deezer_id': '63034',
         },
     ]
+
+    # Récupérer les photos depuis Deezer
+    for concert in concerts_predefinies:
+        try:
+            url = f"https://api.deezer.com/artist/{concert['deezer_id']}"
+            with urllib.request.urlopen(url) as response:
+                artiste_data = json.loads(response.read())
+                concert['image'] = artiste_data.get('picture_xl', artiste_data.get('picture_big', ''))
+        except Exception:
+            concert['image'] = ''
 
     return render(request, 'music/concerts.html', {
         'concerts': concerts_predefinies,
